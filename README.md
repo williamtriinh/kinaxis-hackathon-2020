@@ -5,6 +5,7 @@ Clone this git repository and run `$ npm install` to install neccessary node mod
 
 ## Development
 When making changes, run the following command from the root directory:
+
 `$ browserify index.js -o bundle.js`
 
 ## Running
