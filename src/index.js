@@ -1,3 +1,10 @@
+/**
+ * The "entry" file where the canvas is created and the different components
+ * that make up the game (such as the Game, Render) are instantiated.
+ * 
+ * This code shouldn't be touched
+ */
+
 const Game = require("./Game.js");
 const Render = require("./Render.js");
 

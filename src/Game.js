@@ -1,3 +1,10 @@
+/**
+ * Constructor function responsible for running the update method and
+ * updating the various objects on screen.
+ * 
+ * The code here shouldn't be touched.
+ */
+
 function Game(render)
 {
     this.render = render;
@@ -11,7 +18,7 @@ Game.prototype.init = function()
 
 Game.prototype.update = function()
 {
-    
+    this.render.draw();
 };
 
 module.exports = Game;
