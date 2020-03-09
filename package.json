@@ -19,5 +19,8 @@
   "bugs": {
     "url": "https://github.com/williamtriinh/kinaxis-hackathon-2020/issues"
   },
-  "homepage": "https://github.com/williamtriinh/kinaxis-hackathon-2020#readme"
+  "homepage": "https://github.com/williamtriinh/kinaxis-hackathon-2020#readme",
+  "devDependencies": {
+    "browserify": "^16.5.0"
+  }
 }

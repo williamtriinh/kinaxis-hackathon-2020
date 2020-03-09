@@ -11,7 +11,7 @@ Game.prototype.init = function()
 
 Game.prototype.update = function()
 {
-    console.log("t");
+    
 };
 
 module.exports = Game;
