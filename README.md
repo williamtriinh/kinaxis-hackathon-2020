@@ -11,4 +11,6 @@ When making changes, run the following command from the root directory:
 ## Running
 Run a live server on the `index.html` file (otherwise, some files won't load properly).
 
+VSCode has a nice extension which allows you to run local development servers straight from the editor. ([link](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer))
+
 https://docs.google.com/forms/d/e/1FAIpQLSfSufh8MVCfpDoSy4rXETaszteM816RCOf9_CBATRENd9Dqjw/viewform
