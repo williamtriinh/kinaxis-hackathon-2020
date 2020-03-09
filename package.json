@@ -1,0 +1,23 @@
+{
+  "name": "williamtriinh.github.io.kinaxis-hackathon-2020",
+  "version": "1.0.0",
+  "description": "Javascript game for the 2020 Kinaxis hackathon",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/williamtriinh/kinaxis-hackathon-2020.git"
+  },
+  "keywords": [
+    "Javascript",
+    "Node"
+  ],
+  "author": "William Trinh",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/williamtriinh/kinaxis-hackathon-2020/issues"
+  },
+  "homepage": "https://github.com/williamtriinh/kinaxis-hackathon-2020#readme"
+}
