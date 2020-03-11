@@ -7,6 +7,7 @@
 
 const Game = require("./Game.js");
 const Render = require("./Render.js");
+const Player = require("./Player.js");
 
 // Create the canvas
 const canvas = document.createElement("canvas");
