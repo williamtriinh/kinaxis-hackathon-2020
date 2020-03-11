@@ -14,13 +14,15 @@ function Game(render, player)
 
 Game.prototype.init = function()
 {
-    this.render.renderable.push(player);
+    this.update = this.update.bind(this);
+
+    this.render.renderable.push(this.player);
     loopId = setInterval(this.update, 1000 / 30);
 };
 
 Game.prototype.update = function()
 {
-    this.render.draw(ctx);
+    this.render.draw();
 };
 
 module.exports = Game;

@@ -7,7 +7,9 @@ function Player()
     
 };
 
-Player.prototype.draw(ctx) = function()
+Player.prototype.draw = function(ctx)
 {
     ctx.fillRect(0, 2, 50, 50);
 };
+
+module.exports = Player;

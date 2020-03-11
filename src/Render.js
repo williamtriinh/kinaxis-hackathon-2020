@@ -2,8 +2,8 @@
  * Constructor function that handles rendering objects.
  * This code shouldn't be touched.
  * 
- * @param {Canvas} canvas 
- * @param {Context} ctx 
+ * @param {Canvas} canvas
+ * @param {Context} ctx
  */
 
 function Render(canvas, ctx)
@@ -20,7 +20,7 @@ Render.prototype.draw = function()
 
     for (let i = 0; i < this.renderable.length; i++)
     {
-        this.renderable[i].draw();
+        this.renderable[i].draw(this.ctx);
     }
 }
 
