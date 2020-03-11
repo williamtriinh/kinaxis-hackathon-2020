@@ -16,9 +16,11 @@ function Render(canvas, ctx)
 
 Render.prototype.draw = function()
 {
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
     for (let i = 0; i < this.renderable.length; i++)
     {
-        // draw the objects
+        this.renderable[i].draw();
     }
 }
 

@@ -21,8 +21,9 @@ window.addEventListener("load", () => {
 
     document.body.appendChild(canvas);
 
+    let player = new Player();
     let render = new Render(canvas, ctx);
-    let game = new Game(render);
+    let game = new Game(render, player);
     
     game.init();
 });
