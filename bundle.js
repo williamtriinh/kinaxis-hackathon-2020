@@ -6,10 +6,11 @@
  * The code here shouldn't be touched.
  */
 
-function Game(render, player)
+function Game(render, player, keyboard)
 {
-    this.player = player;
     this.render = render;
+    this.player = player;
+    this.keyboard = keyboard;
     this.loopId = undefined;
 }
 
@@ -18,32 +19,74 @@ Game.prototype.init = function()
     this.update = this.update.bind(this);
 
     this.render.renderable.push(this.player);
-    loopId = setInterval(this.update, 1000 / 30);
+    loopId = setInterval(this.update, 1000 / 60);
 };
 
 Game.prototype.update = function()
 {
+    this.player.update();
     this.render.draw();
 };
 
 module.exports = Game;
 },{}],2:[function(require,module,exports){
-// draw a square
-// movement
-
-
-function Player()
+function Keyboard()
 {
-    
+    // These values will be either 0 or 1.
+}
+
+Keyboard.prototype.left = 0;
+Keyboard.prototype.right = 0;
+Keyboard.prototype.down = 0;
+Keyboard.prototype.up = 0;
+
+module.exports = Keyboard;
+},{}],3:[function(require,module,exports){
+function Player(keyboard)
+{
+    this.x = 200;
+    this.y = 200;
+    this.width = 50;
+    this.height = 50;
+    this.hSpeed = 0;
+    this.vSpeed = 0;
+    this.gravity = 1;
+    this.moveSpeed = 5;
+    this.jumpSpeed = 20;
+    this.floorPosition = 400; // The height at which the "floor" is
+    this.keyboard = keyboard;
 };
+
+Player.prototype.update = function()
+{
+    const { left, right, up } = this.keyboard;
+    this.hSpeed = (right - left) * this.moveSpeed;
+
+    if (this.y < this.floorPosition)
+    {
+        this.vSpeed += this.gravity; // gravity
+    }
+    else
+    {
+        this.vSpeed = 0;
+    }
+
+    if (this.y >= this.floorPosition)
+    {
+        this.vSpeed -= this.jumpSpeed * up;
+    }
+
+    this.x += this.hSpeed;
+    this.y += this.vSpeed;
+}
 
 Player.prototype.draw = function(ctx)
 {
-    ctx.fillRect(0, 2, 50, 50);
+    ctx.fillRect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height);
 };
 
 module.exports = Player;
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 /**
  * Constructor function that handles rendering objects.
  * This code shouldn't be touched.
@@ -58,7 +101,6 @@ function Render(canvas, ctx)
     this.ctx = ctx;
     this.renderable = [];       // The objects that should be drawn to the screen.
     this.unrenderable = [];     // The objects that shouldn't be drawn to the screen.
-    console.log(this.ctx);
 }
 
 Render.prototype.draw = function()
@@ -72,7 +114,7 @@ Render.prototype.draw = function()
 }
 
 module.exports = Render;
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 /**
  * The "entry" file where the canvas is created and the different components
  * that make up the game (such as the Game, Render) are instantiated.
@@ -83,6 +125,7 @@ module.exports = Render;
 const Game = require("./Game.js");
 const Render = require("./Render.js");
 const Player = require("./Player.js");
+const Keyboard = require("./Keyboard.js");
 
 // Create the canvas
 const canvas = document.createElement("canvas");
@@ -96,10 +139,46 @@ window.addEventListener("load", () => {
 
     document.body.appendChild(canvas);
 
-    let player = new Player();
-    let render = new Render(canvas, ctx);
-    let game = new Game(render, player);
+    const keyboard = new Keyboard();
+    const player = new Player(keyboard);
+    const render = new Render(canvas, ctx);
+    const game = new Game(render, player, keyboard);
+
+    window.addEventListener("keydown", (ev) => {
+        switch (ev.code) {
+            case "KeyW":
+                keyboard.up = 1;
+                break;
+            case "KeyS":
+                keyboard.down = 1;
+                break;
+            case "KeyA":
+                keyboard.left = 1;
+                break;
+            case "KeyD":
+                keyboard.right = 1;
+                break;
+        }
+    });
+
+    window.addEventListener("keyup", (ev) => {
+        switch (ev.code) {
+            case "KeyW":
+                keyboard.up = 0;
+                break;
+            case "KeyS":
+                keyboard.down = 0;
+                break;
+            case "KeyA":
+                keyboard.left = 0;
+                break;
+            case "KeyD":
+                keyboard.right = 0;
+                break;
+        }
+    });
     
     game.init();
+
 });
-},{"./Game.js":1,"./Player.js":2,"./Render.js":3}]},{},[4]);
+},{"./Game.js":1,"./Keyboard.js":2,"./Player.js":3,"./Render.js":4}]},{},[5]);

@@ -5,10 +5,11 @@
  * The code here shouldn't be touched.
  */
 
-function Game(render, player)
+function Game(render, player, keyboard)
 {
-    this.player = player;
     this.render = render;
+    this.player = player;
+    this.keyboard = keyboard;
     this.loopId = undefined;
 }
 
@@ -17,11 +18,12 @@ Game.prototype.init = function()
     this.update = this.update.bind(this);
 
     this.render.renderable.push(this.player);
-    loopId = setInterval(this.update, 1000 / 30);
+    loopId = setInterval(this.update, 1000 / 60);
 };
 
 Game.prototype.update = function()
 {
+    this.player.update();
     this.render.draw();
 };
 

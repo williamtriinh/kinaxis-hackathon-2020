@@ -8,6 +8,7 @@
 const Game = require("./Game.js");
 const Render = require("./Render.js");
 const Player = require("./Player.js");
+const Keyboard = require("./Keyboard.js");
 
 // Create the canvas
 const canvas = document.createElement("canvas");
@@ -21,9 +22,45 @@ window.addEventListener("load", () => {
 
     document.body.appendChild(canvas);
 
-    let player = new Player();
-    let render = new Render(canvas, ctx);
-    let game = new Game(render, player);
+    const keyboard = new Keyboard();
+    const player = new Player(keyboard);
+    const render = new Render(canvas, ctx);
+    const game = new Game(render, player, keyboard);
+
+    window.addEventListener("keydown", (ev) => {
+        switch (ev.code) {
+            case "KeyW":
+                keyboard.up = 1;
+                break;
+            case "KeyS":
+                keyboard.down = 1;
+                break;
+            case "KeyA":
+                keyboard.left = 1;
+                break;
+            case "KeyD":
+                keyboard.right = 1;
+                break;
+        }
+    });
+
+    window.addEventListener("keyup", (ev) => {
+        switch (ev.code) {
+            case "KeyW":
+                keyboard.up = 0;
+                break;
+            case "KeyS":
+                keyboard.down = 0;
+                break;
+            case "KeyA":
+                keyboard.left = 0;
+                break;
+            case "KeyD":
+                keyboard.right = 0;
+                break;
+        }
+    });
     
     game.init();
+
 });
