@@ -6,11 +6,12 @@
  * The code here shouldn't be touched.
  */
 
-function Game(render, player, keyboard)
+function Game(render, player, keyboard, fallingObjects)
 {
     this.render = render;
     this.player = player;
     this.keyboard = keyboard;
+    this.fallingObjects = fallingObjects;
     this.loopId = undefined;
 }
 
@@ -19,12 +20,14 @@ Game.prototype.init = function()
     this.update = this.update.bind(this);
 
     this.render.renderable.push(this.player);
+    this.render.renderable.push(this.fallingObjects);
     loopId = setInterval(this.update, 1000 / 60);
 };
 
 Game.prototype.update = function()
 {
     this.player.update();
+    this.fallingObjects.update();
     this.render.draw();
 };
 
@@ -115,6 +118,39 @@ Render.prototype.draw = function()
 
 module.exports = Render;
 },{}],5:[function(require,module,exports){
+function fallingObject()
+{
+    //creating random placements of object
+    // random generation
+    let randX = Math.floor(Math.random() * (window.innerWidth -1)) + 1;
+
+    this.posX = randX;
+    this.posY = 100;
+
+    // speed/gravity
+    this.gravity = 0.005;
+    this.gravitySpeed = 0.5;
+    this.speed = 5;
+};
+
+fallingObject.prototype.update = function()
+{
+    if(this.posY < window.innerHeight-50){
+        this.gravity += this.posY * 0.0002
+        this.posY += this.speed + this.gravity; 
+        console.log(this.gravity);
+    }
+}
+
+fallingObject.prototype.draw = function(ctx)
+{
+    ctx.fillRect(this.posX, this.posY, 50, 50);
+};
+
+module.exports = fallingObject;
+
+
+},{}],6:[function(require,module,exports){
 /**
  * The "entry" file where the canvas is created and the different components
  * that make up the game (such as the Game, Render) are instantiated.
@@ -126,6 +162,7 @@ const Game = require("./Game.js");
 const Render = require("./Render.js");
 const Player = require("./Player.js");
 const Keyboard = require("./Keyboard.js");
+const FallingObjects = require("./fallingObjects.js");
 
 // Create the canvas
 const canvas = document.createElement("canvas");
@@ -141,8 +178,9 @@ window.addEventListener("load", () => {
 
     const keyboard = new Keyboard();
     const player = new Player(keyboard);
+    const fallingObjects = new FallingObjects();
     const render = new Render(canvas, ctx);
-    const game = new Game(render, player, keyboard);
+    const game = new Game(render, player, keyboard, fallingObjects);
 
     window.addEventListener("keydown", (ev) => {
         switch (ev.code) {
@@ -181,4 +219,4 @@ window.addEventListener("load", () => {
     game.init();
 
 });
-},{"./Game.js":1,"./Keyboard.js":2,"./Player.js":3,"./Render.js":4}]},{},[5]);
+},{"./Game.js":1,"./Keyboard.js":2,"./Player.js":3,"./Render.js":4,"./fallingObjects.js":5}]},{},[6]);
