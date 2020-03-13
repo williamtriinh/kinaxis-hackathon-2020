@@ -3,14 +3,17 @@ const FallingObject = require("./FallingObject.js");
 
 function FallingObjectManager()
 {
-
+    this.fallingObject = new FallingObject();
     this.floor = window.innerHeight;
 };
 
-FallingObjectManger.prototype.update = function()
+FallingObjectManager.prototype.update = function()
 {
-    
-    FallingObject.update();
+    this.fallingObject.update();
 };
 
+FallingObjectManager.prototype.draw = function(ctx){
+    this.fallingObject.draw(ctx);
+
+}
 module.exports = FallingObjectManager;
