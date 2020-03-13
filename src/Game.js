@@ -5,28 +5,27 @@
  * The code here shouldn't be touched.
  */
 
-function Game(render, player, keyboard, fallingObjects)
+function Game(render, player, keyboard, manger)
 {
     this.render = render;
     this.player = player;
     this.keyboard = keyboard;
-    this.fallingObjects = fallingObjects;
+    this.manger = manger;
     this.loopId = undefined;
 }
 
 Game.prototype.init = function()
 {
     this.update = this.update.bind(this);
-
     this.render.renderable.push(this.player);
-    this.render.renderable.push(this.fallingObjects);
+    this.render.renderable.push(this.manger);
     loopId = setInterval(this.update, 1000 / 60);
 };
 
 Game.prototype.update = function()
 {
     this.player.update();
-    this.fallingObjects.update();
+    this.manger.update();
     this.render.draw();
 };
 

@@ -1,10 +1,7 @@
 function fallingObject()
 {
-    //creating random placements of object
-    // random generation
-    let randX = Math.floor(Math.random() * (window.innerWidth -1)) + 1;
-
-    this.posX = randX;
+        
+    this.posX = 100;
     this.posY = 100;
 
     // speed/gravity
@@ -30,8 +27,9 @@ fallingObject.prototype.update = function()
 }
 
 fallingObject.prototype.draw = function(ctx)
-{
+{    
     ctx.fillRect(this.posX, this.posY, 50, 50);
+
 };
 
 module.exports = fallingObject;
