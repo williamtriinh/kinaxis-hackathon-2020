@@ -9,7 +9,7 @@ const Game = require("./Game.js");
 const Render = require("./Render.js");
 const Player = require("./Player.js");
 const Keyboard = require("./Keyboard.js");
-const FallingObjectsManger = require("./FallingObjects.js")
+const FallingObjectManger = require("./FallingObjectManager.js")
 
 // Create the canvas
 const canvas = document.createElement("canvas");

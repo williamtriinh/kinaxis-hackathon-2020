@@ -1,5 +1,5 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
-function fallingObject()
+function FallingObject()
 {
         
     this.posX = 100;
@@ -11,7 +11,7 @@ function fallingObject()
     this.speed = 5;
 };
 
-fallingObject.prototype.update = function()
+FallingObject.prototype.update = function()
 {
     // if the object is not touching the bottom use gravity to bring it down
     if(this.posY < window.innerHeight - 50){
@@ -27,13 +27,13 @@ fallingObject.prototype.update = function()
     }
 }
 
-fallingObject.prototype.draw = function(ctx)
+FallingObject.prototype.draw = function(ctx)
 {    
     ctx.fillRect(this.posX, this.posY, 50, 50);
 
 };
 
-module.exports = fallingObject;
+module.exports = FallingObject;
 
 
 },{}],2:[function(require,module,exports){
@@ -166,7 +166,7 @@ const Game = require("./Game.js");
 const Render = require("./Render.js");
 const Player = require("./Player.js");
 const Keyboard = require("./Keyboard.js");
-const FallingObjectsManger = require("./FallingObjects.js")
+const FallingObjectsManger = require("./FallingObject.js")
 
 // Create the canvas
 const canvas = document.createElement("canvas");
@@ -222,4 +222,4 @@ window.addEventListener("load", () => {
     game.init();
 
 });
-},{"./FallingObjects.js":1,"./Game.js":2,"./Keyboard.js":3,"./Player.js":4,"./Render.js":5}]},{},[6]);
+},{"./FallingObject.js":1,"./Game.js":2,"./Keyboard.js":3,"./Player.js":4,"./Render.js":5}]},{},[6]);

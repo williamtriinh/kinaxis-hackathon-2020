@@ -1,7 +1,7 @@
 //require FallingObjects faile to draw objects
-const FallingObjects = require("./FallingObjects.js");
+const FallingObject = require("./FallingObject.js");
 
-function FallingObjectManger()
+function FallingObjectManager()
 {
 
     this.floor = window.innerHeight;
@@ -10,7 +10,7 @@ function FallingObjectManger()
 FallingObjectManger.prototype.update = function()
 {
     
-    FallingObjects.update();
+    FallingObject.update();
 };
 
-module.exports = FallingObjectManger;
+module.exports = FallingObjectManager;

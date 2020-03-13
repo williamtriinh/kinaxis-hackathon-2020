@@ -1,4 +1,4 @@
-function fallingObject()
+function FallingObject()
 {
         
     this.posX = 100;
@@ -10,7 +10,7 @@ function fallingObject()
     this.speed = 5;
 };
 
-fallingObject.prototype.update = function()
+FallingObject.prototype.update = function()
 {
     // if the object is not touching the bottom use gravity to bring it down
     if(this.posY < window.innerHeight - 50){
@@ -26,11 +26,11 @@ fallingObject.prototype.update = function()
     }
 }
 
-fallingObject.prototype.draw = function(ctx)
+FallingObject.prototype.draw = function(ctx)
 {    
     ctx.fillRect(this.posX, this.posY, 50, 50);
 
 };
 
-module.exports = fallingObject;
+module.exports = FallingObject;
 
