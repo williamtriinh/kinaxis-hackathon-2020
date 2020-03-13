@@ -1,4 +1,63 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+function FallingObject()
+{
+        
+    this.posX = 100;
+    this.posY = 100;
+
+    // speed/gravity
+    this.gravity = 0.005;
+    this.gravitySpeed = 0.5;
+    this.speed = 5;
+};
+
+FallingObject.prototype.update = function()
+{
+    // if the object is not touching the bottom use gravity to bring it down
+    if(this.posY < window.innerHeight - 50){
+
+        // exponential gravity
+        this.gravity += this.posY * 0.0002
+
+        // adding gracity plus speed of the object to drag it down
+        this.posY += this.speed + this.gravity; 
+
+        // look at gravity and it changes through console
+        console.log(this.gravity);
+    }
+}
+
+FallingObject.prototype.draw = function(ctx)
+{    
+    ctx.fillRect(this.posX, this.posY, 50, 50);
+
+};
+
+module.exports = FallingObject;
+
+
+},{}],2:[function(require,module,exports){
+//require FallingObjects faile to draw objects
+const FallingObject = require("./FallingObject.js");
+
+function FallingObjectManager()
+{
+    this.fallingObject = new FallingObject();
+    this.floor = window.innerHeight;
+};
+
+FallingObjectManager.prototype.update = function()
+{
+    this.fallingObject.update();
+};
+
+FallingObjectManager.prototype.draw = function(ctx){
+    this.fallingObject.draw(ctx);
+
+}
+module.exports = FallingObjectManager;
+
+},{"./FallingObject.js":1}],3:[function(require,module,exports){
 /**
  * Constructor function responsible for running the update method and
  * updating the various objects on screen.
@@ -6,30 +65,32 @@
  * The code here shouldn't be touched.
  */
 
-function Game(render, player, keyboard)
+function Game(render, player, keyboard, fallingObjectsManager)
 {
     this.render = render;
     this.player = player;
     this.keyboard = keyboard;
+    this.fallingObjectsManager = fallingObjectsManager;
     this.loopId = undefined;
 }
 
 Game.prototype.init = function()
 {
     this.update = this.update.bind(this);
-
     this.render.renderable.push(this.player);
+    this.render.renderable.push(this.fallingObjectsManager);
     loopId = setInterval(this.update, 1000 / 60);
 };
 
 Game.prototype.update = function()
 {
     this.player.update();
+    this.fallingObjectsManager.update();
     this.render.draw();
 };
 
 module.exports = Game;
-},{}],2:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 function Keyboard()
 {
     // These values will be either 0 or 1.
@@ -41,7 +102,7 @@ Keyboard.prototype.down = 0;
 Keyboard.prototype.up = 0;
 
 module.exports = Keyboard;
-},{}],3:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 function Player(keyboard)
 {
     this.x = 200;
@@ -86,7 +147,7 @@ Player.prototype.draw = function(ctx)
 };
 
 module.exports = Player;
-},{}],4:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 /**
  * Constructor function that handles rendering objects.
  * This code shouldn't be touched.
@@ -114,7 +175,7 @@ Render.prototype.draw = function()
 }
 
 module.exports = Render;
-},{}],5:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 /**
  * The "entry" file where the canvas is created and the different components
  * that make up the game (such as the Game, Render) are instantiated.
@@ -126,6 +187,7 @@ const Game = require("./Game.js");
 const Render = require("./Render.js");
 const Player = require("./Player.js");
 const Keyboard = require("./Keyboard.js");
+const FallingObjectManager = require("./FallingObjectManager.js")
 
 // Create the canvas
 const canvas = document.createElement("canvas");
@@ -138,11 +200,11 @@ window.addEventListener("load", () => {
     canvas.height = window.innerHeight;
 
     document.body.appendChild(canvas);
-
     const keyboard = new Keyboard();
     const player = new Player(keyboard);
     const render = new Render(canvas, ctx);
-    const game = new Game(render, player, keyboard);
+    const fallingObjectsManager = new FallingObjectManager();
+    const game = new Game(render, player, keyboard, fallingObjectsManager);
 
     window.addEventListener("keydown", (ev) => {
         switch (ev.code) {
@@ -181,4 +243,4 @@ window.addEventListener("load", () => {
     game.init();
 
 });
-},{"./Game.js":1,"./Keyboard.js":2,"./Player.js":3,"./Render.js":4}]},{},[5]);
+},{"./FallingObjectManager.js":2,"./Game.js":3,"./Keyboard.js":4,"./Player.js":5,"./Render.js":6}]},{},[7]);

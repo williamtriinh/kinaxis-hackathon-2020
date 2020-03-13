@@ -9,6 +9,7 @@ const Game = require("./Game.js");
 const Render = require("./Render.js");
 const Player = require("./Player.js");
 const Keyboard = require("./Keyboard.js");
+const FallingObjectManager = require("./FallingObjectManager.js")
 
 // Create the canvas
 const canvas = document.createElement("canvas");
@@ -21,11 +22,11 @@ window.addEventListener("load", () => {
     canvas.height = window.innerHeight;
 
     document.body.appendChild(canvas);
-
     const keyboard = new Keyboard();
     const player = new Player(keyboard);
     const render = new Render(canvas, ctx);
-    const game = new Game(render, player, keyboard);
+    const fallingObjectsManager = new FallingObjectManager();
+    const game = new Game(render, player, keyboard, fallingObjectsManager);
 
     window.addEventListener("keydown", (ev) => {
         switch (ev.code) {
