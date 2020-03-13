@@ -1,11 +1,15 @@
-
+//require FallingObjects faile to draw objects
 const FallingObjects = require("./FallingObjects.js");
-function FallingObjectManger(){
+
+function FallingObjectManger()
+{
 
     this.floor = window.innerHeight;
 };
 
-FallingObjectManger.prototype.update = function(){
+FallingObjectManger.prototype.update = function()
+{
+    
     FallingObjects.update();
 };
 

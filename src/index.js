@@ -25,8 +25,8 @@ window.addEventListener("load", () => {
     const keyboard = new Keyboard();
     const player = new Player(keyboard);
     const render = new Render(canvas, ctx);
-    const manger = new FallingObjectsManger();
-    const game = new Game(render, player, keyboard, manger);
+    const fallingObjectsManger = new FallingObjectsManger();
+    const game = new Game(render, player, keyboard, fallingObjectsManger);
 
     window.addEventListener("keydown", (ev) => {
         switch (ev.code) {

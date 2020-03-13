@@ -44,12 +44,12 @@ module.exports = fallingObject;
  * The code here shouldn't be touched.
  */
 
-function Game(render, player, keyboard, manger)
+function Game(render, player, keyboard, fallingObjectsManger)
 {
     this.render = render;
     this.player = player;
     this.keyboard = keyboard;
-    this.manger = manger;
+    this.fallingObjectsManger = fallingObjectsManger;
     this.loopId = undefined;
 }
 
@@ -57,14 +57,14 @@ Game.prototype.init = function()
 {
     this.update = this.update.bind(this);
     this.render.renderable.push(this.player);
-    this.render.renderable.push(this.manger);
+    this.render.renderable.push(this.fallingObjectsManger);
     loopId = setInterval(this.update, 1000 / 60);
 };
 
 Game.prototype.update = function()
 {
     this.player.update();
-    this.manger.update();
+    this.fallingObjectsManger.update();
     this.render.draw();
 };
 
@@ -182,8 +182,8 @@ window.addEventListener("load", () => {
     const keyboard = new Keyboard();
     const player = new Player(keyboard);
     const render = new Render(canvas, ctx);
-    const manger = new FallingObjectsManger();
-    const game = new Game(render, player, keyboard, manger);
+    const fallingObjectsManger = new FallingObjectsManger();
+    const game = new Game(render, player, keyboard, fallingObjectsManger);
 
     window.addEventListener("keydown", (ev) => {
         switch (ev.code) {
