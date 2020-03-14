@@ -22,7 +22,7 @@ FallingObject.prototype.update = function()
         this.posY += this.speed + this.gravity; 
 
         // look at gravity and it changes through console
-        console.log(this.gravity);
+        // console.log(this.gravity);
     }
 }
 
