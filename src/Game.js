@@ -19,7 +19,7 @@ Game.prototype.init = function()
     this.update = this.update.bind(this);
     this.render.renderable.push(this.player);
     this.render.renderable.push(this.fallingObjectsManager);
-    loopId = setInterval(this.update, 1000 / 60);
+    loopId = setInterval(this.update, 1000 / 50);
 };
 
 Game.prototype.update = function()
