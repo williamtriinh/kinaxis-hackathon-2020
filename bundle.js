@@ -82,7 +82,7 @@ Game.prototype.init = function()
     this.update = this.update.bind(this);
     this.render.renderable.push(this.player);
     this.render.renderable.push(this.fallingObjectsManager);
-    loopId = setInterval(this.update, 1000 / 60);
+    loopId = setInterval(this.update, 1000 / 50);
 };
 
 Game.prototype.update = function()
@@ -253,15 +253,20 @@ window.addEventListener("load", () => {
     window.addEventListener("keydown", (ev) => {
         switch (ev.code) {
             case "KeyW":
+            case "ArrowUp":
+            case "Space":
                 keyboard.up = 1;
                 break;
             case "KeyS":
+            case "ArrowDown":
                 keyboard.down = 1;
                 break;
             case "KeyA":
+            case "ArrowLeft":
                 keyboard.left = 1;
                 break;
             case "KeyD":
+            case "ArrowRight":
                 keyboard.right = 1;
                 break;
         }
@@ -270,15 +275,20 @@ window.addEventListener("load", () => {
     window.addEventListener("keyup", (ev) => {
         switch (ev.code) {
             case "KeyW":
+            case "ArrowUp":
+            case "Space":
                 keyboard.up = 0;
                 break;
             case "KeyS":
+            case "ArrowDown":
                 keyboard.down = 0;
                 break;
             case "KeyA":
+            case "ArrowLeft":
                 keyboard.left = 0;
                 break;
             case "KeyD":
+            case "ArrowRight":
                 keyboard.right = 0;
                 break;
         }
