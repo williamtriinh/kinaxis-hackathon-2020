@@ -1,8 +1,7 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
-function FallingObject()
-{
-        
-    this.posX = 100;
+function FallingObject(x)
+{        
+    this.posX = x;
     this.posY = 100;
 
     // speed/gravity
@@ -39,21 +38,26 @@ module.exports = FallingObject;
 },{}],2:[function(require,module,exports){
 //require FallingObjects faile to draw objects
 const FallingObject = require("./FallingObject.js");
+var myarray = [];
 
 function FallingObjectManager()
 {
-    this.fallingObject = new FallingObject();
-    this.floor = window.innerHeight;
+    for(i = 0; i < 10; i++){
+        // adding elements to the array
+        myarray[i] = new FallingObject(Math.floor(Math.random() * window.innerWidth - 50) - 50);
+        
+    }
 };
 
 FallingObjectManager.prototype.update = function()
 {
-    this.fallingObject.update();
+    setTimeout(function () { myarray[i].update(); i++}, 2000);
 };
 
 FallingObjectManager.prototype.draw = function(ctx){
-    this.fallingObject.draw(ctx);
-
+    i = 0;
+    setTimeout(function () { myarray[i].draw(ctx); i++}, 2000);
+    
 }
 module.exports = FallingObjectManager;
 

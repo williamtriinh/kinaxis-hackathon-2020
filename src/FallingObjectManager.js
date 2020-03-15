@@ -1,19 +1,24 @@
 //require FallingObjects faile to draw objects
 const FallingObject = require("./FallingObject.js");
+var myarray = [];
 
 function FallingObjectManager()
 {
-    this.fallingObject = new FallingObject();
-    this.floor = window.innerHeight;
+    for(i = 0; i < 10; i++){
+        // adding elements to the array
+        myarray[i] = new FallingObject(Math.floor(Math.random() * window.innerWidth - 50) - 50);
+        
+    }
 };
 
 FallingObjectManager.prototype.update = function()
 {
-    this.fallingObject.update();
+    setTimeout(function () { myarray[i].update(); i++}, 2000);
 };
 
 FallingObjectManager.prototype.draw = function(ctx){
-    this.fallingObject.draw(ctx);
-
+    i = 0;
+    setTimeout(function () { myarray[i].draw(ctx); i++}, 2000);
+    
 }
 module.exports = FallingObjectManager;
