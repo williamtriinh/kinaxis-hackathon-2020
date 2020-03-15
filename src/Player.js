@@ -9,7 +9,7 @@ function Player(keyboard)
         y: 0
     }
     this.maxHVelocity = 6;
-    this.acceleration = 0.8;
+    this.acceleration = 0.8; // Applied to the horizontal only
     this.friction = 0.4;
     this.gravity = 1;
     this.jumpSpeed = 20;
