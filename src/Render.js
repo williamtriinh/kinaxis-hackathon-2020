@@ -20,13 +20,6 @@ function Render(canvas, ctx)
     Render.prototype.viewHeight = 360;
     Render.prototype.renderable = [];
     Render.prototype.unrenderable = [];
-    
-    // this.canvas = canvas;
-    // this.ctx = ctx;
-    // this.baseWidth = 640;       // The base width of the game
-    // this.baseHeight = 360;      // The base height of the game
-    // this.renderable = [];       // The objects that should be drawn to the screen.
-    // this.unrenderable = [];     // The objects that shouldn't be drawn to the screen.
 
     // Initialize the canvas properties
     this.ctx.imageSmoothingEnabled = false;
@@ -37,16 +30,15 @@ function Render(canvas, ctx)
 
 Render.prototype.draw = function()
 {
-    this.ctx.fillStyle = "pink";
-    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    this.ctx.clearRect(0, 0, this.baseWidth, this.baseHeight);
 
-    this.ctx.fillStyle = "black"
-
-    this.camera.player.draw(this.ctx);
+    this.ctx.fillStyle = "black";
     
     for (let i = 0; i < this.renderable.length; i++)
     {
-        this.ctx.translate(-this.camera.x, this.camera.y);
+        this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+        this.ctx.translate(-this.camera.x, -this.camera.y);
+        this.ctx.scale(this.camera.zoom, this.camera.zoom);
         this.renderable[i].draw(this.ctx);
         this.ctx.translate(this.camera.x, this.camera.y);
     }

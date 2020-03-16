@@ -11,15 +11,15 @@ const STATE_INTERLUDE = 1;          // The "pause" between the waves for prepari
 function Camera(render)
 {
     this.render = render;
-    // this.x = 0;
-    // this.y = 0;
-    // this.zoom = 1;
-    this.state = STATE_GAME;
+    this.zoomTimer = undefined;
+    this.isZooming = false;
 }
 
 Camera.prototype.player = undefined;
 Camera.prototype.x = 0;
 Camera.prototype.y = 0;
+Camera.prototype.zoom = 1;
+Camera.prototype.state = STATE_GAME;
 
 Camera.prototype.attach = function(player)
 {
@@ -31,16 +31,20 @@ Camera.prototype.update = function()
     if (this.player.x < 0 && this.state === STATE_GAME)
     {
         this.state = STATE_INTERLUDE;
+        this.zoom = 1.5;
     }
     else if (this.player.x > 0 && this.state === STATE_INTERLUDE)
     {
-        this.x = 0;
         this.state = STATE_GAME;
+        this.x = 0;
+        this.y = 0;
+        this.zoom = 1;
     }
 
     if (this.state === STATE_INTERLUDE)
     {
-        this.x = this.player.x - this.render.baseWidth / 2;
+        this.x = this.player.x * this.zoom - this.render.baseWidth / 2;
+        this.y = this.player.y * this.zoom - this.render.baseHeight / 1.5;
     }
 }
 
@@ -133,7 +137,7 @@ Game.prototype.init = function()
     this.camera = this.render.camera;
     this.camera.attach(this.player);
 
-    // this.render.renderable.push(this.player);
+    this.render.renderable.push(this.player);
     this.render.renderable.push(this.fallingObjectsManager);
 
     // Begin the update loop
@@ -244,14 +248,7 @@ Player.prototype.update = function()
 
 Player.prototype.draw = function(ctx)
 {
-    if (this.x >= 0)
-    {
-        ctx.fillRect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height);
-    }
-    else
-    {
-        ctx.fillRect(320, this.y - this.height / 2, this.width, this.height);   
-    }
+    ctx.fillRect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height);
 };
 
 module.exports = Player;
@@ -278,13 +275,6 @@ function Render(canvas, ctx)
     Render.prototype.viewHeight = 360;
     Render.prototype.renderable = [];
     Render.prototype.unrenderable = [];
-    
-    // this.canvas = canvas;
-    // this.ctx = ctx;
-    // this.baseWidth = 640;       // The base width of the game
-    // this.baseHeight = 360;      // The base height of the game
-    // this.renderable = [];       // The objects that should be drawn to the screen.
-    // this.unrenderable = [];     // The objects that shouldn't be drawn to the screen.
 
     // Initialize the canvas properties
     this.ctx.imageSmoothingEnabled = false;
@@ -295,16 +285,15 @@ function Render(canvas, ctx)
 
 Render.prototype.draw = function()
 {
-    this.ctx.fillStyle = "pink";
-    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    this.ctx.clearRect(0, 0, this.baseWidth, this.baseHeight);
 
-    this.ctx.fillStyle = "black"
-
-    this.camera.player.draw(this.ctx);
+    this.ctx.fillStyle = "black";
     
     for (let i = 0; i < this.renderable.length; i++)
     {
-        this.ctx.translate(-this.camera.x, this.camera.y);
+        this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+        this.ctx.translate(-this.camera.x, -this.camera.y);
+        this.ctx.scale(this.camera.zoom, this.camera.zoom);
         this.renderable[i].draw(this.ctx);
         this.ctx.translate(this.camera.x, this.camera.y);
     }

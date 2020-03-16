@@ -22,7 +22,7 @@ Game.prototype.init = function()
     this.camera = this.render.camera;
     this.camera.attach(this.player);
 
-    // this.render.renderable.push(this.player);
+    this.render.renderable.push(this.player);
     this.render.renderable.push(this.fallingObjectsManager);
 
     // Begin the update loop

@@ -80,14 +80,7 @@ Player.prototype.update = function()
 
 Player.prototype.draw = function(ctx)
 {
-    if (this.x >= 0)
-    {
-        ctx.fillRect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height);
-    }
-    else
-    {
-        ctx.fillRect(320, this.y - this.height / 2, this.width, this.height);   
-    }
+    ctx.fillRect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height);
 };
 
 module.exports = Player;
