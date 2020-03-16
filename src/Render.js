@@ -14,8 +14,8 @@ function Render(canvas, ctx)
     Render.prototype.canvas = canvas;
     Render.prototype.ctx = ctx;
     Render.prototype.camera = new Camera(this);
-    Render.prototype.baseWidth = 640;
-    Render.prototype.baseHeight = 360;
+    Render.prototype.baseWidth = 1280;
+    Render.prototype.baseHeight = 720;
     Render.prototype.viewWidth = 640;
     Render.prototype.viewHeight = 360;
     Render.prototype.renderable = [];
@@ -30,7 +30,9 @@ function Render(canvas, ctx)
 
 Render.prototype.draw = function()
 {
-    this.ctx.clearRect(0, 0, this.baseWidth, this.baseHeight);
+    this.ctx.fillStyle = "pink";
+    this.ctx.fillRect(0, 0, this.baseWidth, this.baseHeight);
+    // this.ctx.clearRect(0, 0, this.baseWidth, this.baseHeight);
 
     this.ctx.fillStyle = "black";
     
