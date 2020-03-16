@@ -1,9 +1,9 @@
 function Player(keyboard)
 {
-    this.x = 200;
-    this.y = 200;
-    this.width = 50;
-    this.height = 50;
+    this.x = 320;           // Start the player at half the game width
+    this.y = 0;
+    this.width = 16;
+    this.height = 16;
     this.velocity = {
         x: 0,
         y: 0
@@ -12,8 +12,8 @@ function Player(keyboard)
     this.acceleration = 0.8; // Applied to the horizontal only
     this.friction = 0.4;
     this.gravity = 1;
-    this.jumpSpeed = 20;
-    this.floorPosition = 400; // The height at which the "floor" is
+    this.jumpSpeed = 15;
+    this.floorPosition = 360; // The height at which the "floor" is
     this.keyboard = keyboard;
 
     this.applyFriction = this.applyFriction.bind(this);
@@ -57,17 +57,18 @@ Player.prototype.update = function()
     }
 
     //  Apply gravity when the player is not grounded
-    if (this.y < this.floorPosition)
+    if (this.y + this.height / 2 < this.floorPosition)
     {
         this.velocity.y += this.gravity; // gravity
     }
     else
     {
         this.velocity.y = 0;
+        this.y = this.floorPosition - this.height / 2;
     }
 
     // Allow the player to jump when they're grounded
-    if (this.y >= this.floorPosition)
+    if (this.y + this.height / 2 + 1 >= this.floorPosition)
     {
         this.velocity.y -= this.jumpSpeed * up;
     }
@@ -79,7 +80,14 @@ Player.prototype.update = function()
 
 Player.prototype.draw = function(ctx)
 {
-    ctx.fillRect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height);
+    if (this.x >= 0)
+    {
+        ctx.fillRect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height);
+    }
+    else
+    {
+        ctx.fillRect(320, this.y - this.height / 2, this.width, this.height);   
+    }
 };
 
 module.exports = Player;

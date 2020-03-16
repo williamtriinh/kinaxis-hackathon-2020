@@ -1,4 +1,52 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+/** 
+ * Handles all camera related actions
+ * 
+ * @param {player} Player object
+ */
+
+const STATE_GAME = 0;               // The falling object part of the game
+const STATE_INTERLUDE = 1;          // The "pause" between the waves for preparing for waves
+
+function Camera(render)
+{
+    this.render = render;
+    // this.x = 0;
+    // this.y = 0;
+    // this.zoom = 1;
+    this.state = STATE_GAME;
+}
+
+Camera.prototype.player = undefined;
+Camera.prototype.x = 0;
+Camera.prototype.y = 0;
+
+Camera.prototype.attach = function(player)
+{
+    this.player = player;
+}
+
+Camera.prototype.update = function()
+{
+    if (this.player.x < 0 && this.state === STATE_GAME)
+    {
+        this.state = STATE_INTERLUDE;
+    }
+    else if (this.player.x > 0 && this.state === STATE_INTERLUDE)
+    {
+        this.x = 0;
+        this.state = STATE_GAME;
+    }
+
+    if (this.state === STATE_INTERLUDE)
+    {
+        this.x = this.player.x - this.render.baseWidth / 2;
+    }
+}
+
+module.exports = Camera;
+
+},{}],2:[function(require,module,exports){
 function FallingObject()
 {
         
@@ -16,7 +64,7 @@ function FallingObject()
 FallingObject.prototype.update = function()
 {
     // if the object is not touching the bottom use gravity to bring it down
-    if(this.y < window.innerHeight - 50){
+    if(this.y < 360 - 50){
 
         // exponential gravity
         this.velocity.y += this.gravity;
@@ -39,7 +87,7 @@ FallingObject.prototype.draw = function(ctx)
 module.exports = FallingObject;
 
 
-},{}],2:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 //require FallingObjects faile to draw objects
 const FallingObject = require("./FallingObject.js");
 
@@ -60,7 +108,7 @@ FallingObjectManager.prototype.draw = function(ctx){
 }
 module.exports = FallingObjectManager;
 
-},{"./FallingObject.js":1}],3:[function(require,module,exports){
+},{"./FallingObject.js":2}],4:[function(require,module,exports){
 /**
  * Constructor function responsible for running the update method and
  * updating the various objects on screen.
@@ -75,25 +123,33 @@ function Game(render, player, keyboard, fallingObjectsManager)
     this.keyboard = keyboard;
     this.fallingObjectsManager = fallingObjectsManager;
     this.loopId = undefined;
+    this.camera = undefined;
 }
 
 Game.prototype.init = function()
 {
     this.update = this.update.bind(this);
-    this.render.renderable.push(this.player);
+
+    this.camera = this.render.camera;
+    this.camera.attach(this.player);
+
+    // this.render.renderable.push(this.player);
     this.render.renderable.push(this.fallingObjectsManager);
+
+    // Begin the update loop
     loopId = setInterval(this.update, 1000 / 50);
 };
 
 Game.prototype.update = function()
 {
     this.player.update();
+    this.camera.update();
     this.fallingObjectsManager.update();
     this.render.draw();
 };
 
 module.exports = Game;
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 function Keyboard()
 {
     // These values will be either 0 or 1.
@@ -105,13 +161,13 @@ Keyboard.prototype.down = 0;
 Keyboard.prototype.up = 0;
 
 module.exports = Keyboard;
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 function Player(keyboard)
 {
-    this.x = 200;
-    this.y = 200;
-    this.width = 50;
-    this.height = 50;
+    this.x = 320;           // Start the player at half the game width
+    this.y = 0;
+    this.width = 16;
+    this.height = 16;
     this.velocity = {
         x: 0,
         y: 0
@@ -120,8 +176,8 @@ function Player(keyboard)
     this.acceleration = 0.8; // Applied to the horizontal only
     this.friction = 0.4;
     this.gravity = 1;
-    this.jumpSpeed = 20;
-    this.floorPosition = 400; // The height at which the "floor" is
+    this.jumpSpeed = 15;
+    this.floorPosition = 360; // The height at which the "floor" is
     this.keyboard = keyboard;
 
     this.applyFriction = this.applyFriction.bind(this);
@@ -165,17 +221,18 @@ Player.prototype.update = function()
     }
 
     //  Apply gravity when the player is not grounded
-    if (this.y < this.floorPosition)
+    if (this.y + this.height / 2 < this.floorPosition)
     {
         this.velocity.y += this.gravity; // gravity
     }
     else
     {
         this.velocity.y = 0;
+        this.y = this.floorPosition - this.height / 2;
     }
 
     // Allow the player to jump when they're grounded
-    if (this.y >= this.floorPosition)
+    if (this.y + this.height / 2 + 1 >= this.floorPosition)
     {
         this.velocity.y -= this.jumpSpeed * up;
     }
@@ -187,13 +244,23 @@ Player.prototype.update = function()
 
 Player.prototype.draw = function(ctx)
 {
-    ctx.fillRect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height);
+    if (this.x >= 0)
+    {
+        ctx.fillRect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height);
+    }
+    else
+    {
+        ctx.fillRect(320, this.y - this.height / 2, this.width, this.height);   
+    }
 };
 
 module.exports = Player;
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
+const Camera = require("./Camera.js");
+
 /**
  * Constructor function that handles rendering objects.
+ 
  * This code shouldn't be touched.
  * 
  * @param {Canvas} canvas
@@ -202,24 +269,70 @@ module.exports = Player;
 
 function Render(canvas, ctx)
 {
-    this.canvas = canvas;
-    this.ctx = ctx;
-    this.renderable = [];       // The objects that should be drawn to the screen.
-    this.unrenderable = [];     // The objects that shouldn't be drawn to the screen.
+    Render.prototype.canvas = canvas;
+    Render.prototype.ctx = ctx;
+    Render.prototype.camera = new Camera(this);
+    Render.prototype.baseWidth = 640;
+    Render.prototype.baseHeight = 360;
+    Render.prototype.viewWidth = 640;
+    Render.prototype.viewHeight = 360;
+    Render.prototype.renderable = [];
+    Render.prototype.unrenderable = [];
+    
+    // this.canvas = canvas;
+    // this.ctx = ctx;
+    // this.baseWidth = 640;       // The base width of the game
+    // this.baseHeight = 360;      // The base height of the game
+    // this.renderable = [];       // The objects that should be drawn to the screen.
+    // this.unrenderable = [];     // The objects that shouldn't be drawn to the screen.
+
+    // Initialize the canvas properties
+    this.ctx.imageSmoothingEnabled = false;
+    this.canvas.width = this.baseWidth;
+    this.canvas.height = this.baseHeight;
+    this.resizeCanvas();
 }
 
 Render.prototype.draw = function()
 {
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.ctx.fillStyle = "pink";
+    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
+    this.ctx.fillStyle = "black"
+
+    this.camera.player.draw(this.ctx);
+    
     for (let i = 0; i < this.renderable.length; i++)
     {
+        this.ctx.translate(-this.camera.x, this.camera.y);
         this.renderable[i].draw(this.ctx);
+        this.ctx.translate(this.camera.x, this.camera.y);
+    }
+}
+
+Render.prototype.resizeCanvas = function()
+{
+    let winWidth = window.innerWidth;
+    let winHeight = window.innerHeight;
+    let aspectRatio = this.baseWidth / this.baseHeight;
+
+    // Scale the canvas so that it's always the same aspect ratio
+    if (winHeight * aspectRatio > winWidth) {
+        this.canvas.style.width = winWidth + "px";
+        this.canvas.style.height = winWidth / aspectRatio + "px";
+        this.viewWidth = winWidth;
+        this.viewHeight = winWidth / aspectRatio;
+    }
+    else {
+        this.canvas.style.width = winHeight * aspectRatio + "px";
+        this.canvas.style.height = winHeight + "px";
+        this.viewWidth = winHeight * aspectRatio;
+        this.viewHeight = winHeight;
     }
 }
 
 module.exports = Render;
-},{}],7:[function(require,module,exports){
+},{"./Camera.js":1}],8:[function(require,module,exports){
 /**
  * The "entry" file where the canvas is created and the different components
  * that make up the game (such as the Game, Render) are instantiated.
@@ -239,11 +352,9 @@ const ctx = canvas.getContext("2d");
 
 window.addEventListener("load", () => {
 
-    // Initialize the canvas properties
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-
     document.body.appendChild(canvas);
+
+    // Instantiate the game components
     const keyboard = new Keyboard();
     const player = new Player(keyboard);
     const render = new Render(canvas, ctx);
@@ -293,8 +404,10 @@ window.addEventListener("load", () => {
                 break;
         }
     });
+
+    window.addEventListener("resize", () => render.resizeCanvas());
     
     game.init();
 
 });
-},{"./FallingObjectManager.js":2,"./Game.js":3,"./Keyboard.js":4,"./Player.js":5,"./Render.js":6}]},{},[7]);
+},{"./FallingObjectManager.js":3,"./Game.js":4,"./Keyboard.js":5,"./Player.js":6,"./Render.js":7}]},{},[8]);
