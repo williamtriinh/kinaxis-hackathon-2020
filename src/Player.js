@@ -25,7 +25,7 @@ function Player(keyboard)
         rowIndex: 0, // y
         columnIndex: 0, // x
         animationSpeed: 0.1,
-        size: [4, 4, 6, 6, 2, 2] // The size of the row (starting from the top)
+        size: [4, 4, 6, 6] // The size of the row (starting from the top)
     }
 
     this.sprite.image.src = sprite;
@@ -49,22 +49,7 @@ Player.prototype.applyFriction = function()
 // Handles animating the sprite (by changing the index)
 Player.prototype.animate = function()
 {
-    if (this.isGrounded)
-    {
-        this.sprite.columnIndex = (this.sprite.columnIndex + this.sprite.animationSpeed) % this.sprite.size[this.sprite.rowIndex];
-    }
-    else
-    {
-        if (this.sprite.columnIndex >= 1)
-        {
-            this.sprite.columnIndex = 1;
-        }
-        else
-        {
-            this.sprite.columnIndex += this.sprite.animationSpeed;
-        }
-        
-    }
+    this.sprite.columnIndex = (this.sprite.columnIndex + this.sprite.animationSpeed) % this.sprite.size[this.sprite.rowIndex];
 }
 
 Player.prototype.update = function()
@@ -87,7 +72,6 @@ Player.prototype.update = function()
     if (this.y + this.height / 2 < this.floorPosition)
     {
         this.velocity.y += this.gravity; // gravity
-        this.isGrounded = false;
     }
     else
     {
@@ -99,7 +83,6 @@ Player.prototype.update = function()
     if (this.y + this.height / 2 + 1 >= this.floorPosition)
     {
         this.velocity.y -= this.jumpSpeed * up;
-        this.isGrounded = true;
     }
 
     // Update the player's position
@@ -112,17 +95,13 @@ Player.prototype.update = function()
         this.sprite.dir = (horDirection === 1 ? 0 : 1);
     }
 
-    if (this.isGrounded)
-    {
-        if (this.velocity.x) {
-            this.sprite.rowIndex = 2 + this.sprite.dir;
-            this.sprite.animationSpeed = 0.25;
-        }
-        else {
-            this.sprite.rowIndex = 0 + this.sprite.dir;
-            this.sprite.animationSpeed = 0.1;
-        }
-
+    if (this.velocity.x) {
+        this.sprite.rowIndex = 2 + this.sprite.dir;
+        this.sprite.animationSpeed = 0.25;
+    }
+    else {
+        this.sprite.rowIndex = 0 + this.sprite.dir;
+        this.sprite.animationSpeed = 0.1;
     }
 
     // Animate the player
