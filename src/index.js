@@ -17,11 +17,9 @@ const ctx = canvas.getContext("2d");
 
 window.addEventListener("load", () => {
 
-    // Initialize the canvas properties
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-
     document.body.appendChild(canvas);
+
+    // Instantiate the game components
     const keyboard = new Keyboard();
     const player = new Player(keyboard);
     const render = new Render(canvas, ctx);
@@ -31,15 +29,20 @@ window.addEventListener("load", () => {
     window.addEventListener("keydown", (ev) => {
         switch (ev.code) {
             case "KeyW":
+            case "ArrowUp":
+            case "Space":
                 keyboard.up = 1;
                 break;
             case "KeyS":
+            case "ArrowDown":
                 keyboard.down = 1;
                 break;
             case "KeyA":
+            case "ArrowLeft":
                 keyboard.left = 1;
                 break;
             case "KeyD":
+            case "ArrowRight":
                 keyboard.right = 1;
                 break;
         }
@@ -48,19 +51,26 @@ window.addEventListener("load", () => {
     window.addEventListener("keyup", (ev) => {
         switch (ev.code) {
             case "KeyW":
+            case "ArrowUp":
+            case "Space":
                 keyboard.up = 0;
                 break;
             case "KeyS":
+            case "ArrowDown":
                 keyboard.down = 0;
                 break;
             case "KeyA":
+            case "ArrowLeft":
                 keyboard.left = 0;
                 break;
             case "KeyD":
+            case "ArrowRight":
                 keyboard.right = 0;
                 break;
         }
     });
+
+    window.addEventListener("resize", () => render.resizeCanvas());
     
     game.init();
 

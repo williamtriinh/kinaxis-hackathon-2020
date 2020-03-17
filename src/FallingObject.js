@@ -15,7 +15,7 @@ function FallingObject()
 FallingObject.prototype.update = function()
 {
     // if the object is not touching the bottom use gravity to bring it down
-    if(this.y < window.innerHeight - 50){
+    if(this.y < 700 - 50){
 
         // exponential gravity
         this.velocity.y += this.gravity;
@@ -25,6 +25,10 @@ FallingObject.prototype.update = function()
 
         // look at gravity and it changes through console
         // console.log(this.gravity);
+    }
+    else
+    {
+        this.y = 720 - 50;
     }
     this.x += this.velocity.x;
 }
