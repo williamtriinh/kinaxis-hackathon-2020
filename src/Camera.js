@@ -27,23 +27,26 @@ Camera.prototype.attach = function(player)
 
 Camera.prototype.update = function()
 {
-    if (this.player.x < 0 && this.state === STATE_GAME)
+    if (this.player.x < 0 || this.player.x > this.render.baseWidth && this.state === STATE_GAME)
     {
         this.state = STATE_INTERLUDE;
-        this.zoom = 1.5;
     }
     else if (this.player.x > 0 && this.state === STATE_INTERLUDE)
     {
         this.state = STATE_GAME;
         this.x = 0;
         this.y = 0;
-        this.zoom = 1;
     }
 
     if (this.state === STATE_INTERLUDE)
     {
-        this.x = this.player.x * this.zoom - this.render.baseWidth / 2;
-        this.y = this.player.y * this.zoom - this.render.baseHeight / 1.5;
+        this.x = this.player.x - this.render.baseWidth / 2;
+        this.y = this.player.y - this.render.baseHeight / 1.5;
+
+        if (this.x <= -this.render.baseWidth)
+        {
+            this.x = -this.render.baseWidth;
+        }
     }
 }
 

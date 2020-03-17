@@ -28,23 +28,26 @@ Camera.prototype.attach = function(player)
 
 Camera.prototype.update = function()
 {
-    if (this.player.x < 0 && this.state === STATE_GAME)
+    if (this.player.x < 0 || this.player.x > this.render.baseWidth && this.state === STATE_GAME)
     {
         this.state = STATE_INTERLUDE;
-        this.zoom = 1.5;
     }
     else if (this.player.x > 0 && this.state === STATE_INTERLUDE)
     {
         this.state = STATE_GAME;
         this.x = 0;
         this.y = 0;
-        this.zoom = 1;
     }
 
     if (this.state === STATE_INTERLUDE)
     {
-        this.x = this.player.x * this.zoom - this.render.baseWidth / 2;
-        this.y = this.player.y * this.zoom - this.render.baseHeight / 1.5;
+        this.x = this.player.x - this.render.baseWidth / 2;
+        this.y = this.player.y - this.render.baseHeight / 1.5;
+
+        if (this.x <= -this.render.baseWidth)
+        {
+            this.x = -this.render.baseWidth;
+        }
     }
 }
 
@@ -68,7 +71,7 @@ function FallingObject()
 FallingObject.prototype.update = function()
 {
     // if the object is not touching the bottom use gravity to bring it down
-    if(this.y < 700 - 50){
+    if(this.y < 720 - 64 - 50){
 
         // exponential gravity
         this.velocity.y += this.gravity;
@@ -81,7 +84,7 @@ FallingObject.prototype.update = function()
     }
     else
     {
-        this.y = 720 - 50;
+        this.y = 720 - 64 - 50;
     }
     this.x += this.velocity.x;
 }
@@ -182,13 +185,14 @@ function Player(keyboard)
         x: 0,
         y: 0
     }
+    this.index = 1;
     this.maxHVelocity = 6;
     this.acceleration = 0.8; // Applied to the horizontal only
     this.friction = 0.4;
     this.gravity = 1;
     this.jumpSpeed = 15;
     this.isGrounded = true;
-    this.floorPosition = 720; // The height at which the "floor" is
+    this.floorPosition = 720 - 64; // The height at which the "floor" is
     this.keyboard = keyboard;
 
     this.sprite = {
@@ -234,27 +238,22 @@ Player.prototype.update = function()
 
     // Apply horizontal acceleration to the player
     this.velocity.x += horDirection * this.acceleration;
+    this.velocity.y += this.gravity;
 
     if (this.velocity.x >= this.maxHVelocity || this.velocity.x <= -this.maxHVelocity)
     {
         this.velocity.x = this.maxHVelocity * horDirection;
     }
 
-    //  Apply gravity when the player is not grounded
-    if (this.y + this.height / 2 < this.floorPosition)
-    {
-        this.velocity.y += this.gravity; // gravity
-    }
-    else
-    {
+    // Make sure the player doesn't pass the floor
+    if (this.y + this.height / 2 + this.velocity.y >= this.floorPosition) {
         this.velocity.y = 0;
         this.y = this.floorPosition - this.height / 2;
     }
 
-    // Allow the player to jump when they're grounded
-    if (this.y + this.height / 2 + 1 >= this.floorPosition)
+    if (this.y + this.height / 2 + 2 >= this.floorPosition)
     {
-        this.velocity.y -= this.jumpSpeed * up;
+        this.velocity.y -= up * this.jumpSpeed;
     }
 
     // Update the player's position
@@ -299,6 +298,8 @@ Player.prototype.draw = function(ctx)
 module.exports = Player;
 },{}],7:[function(require,module,exports){
 const Camera = require("./Camera.js");
+const mainBackground = "./src/assets/art/main-background.png";
+const interludeBackground = "./src/assets/art/interlude-background.png";
 
 /**
  * Constructor function that handles rendering objects.
@@ -320,6 +321,13 @@ function Render(canvas, ctx)
     Render.prototype.viewHeight = 360;
     Render.prototype.renderable = [];
     Render.prototype.unrenderable = [];
+    Render.prototype.backgroundRenderable = {
+        main: new Image(),
+        interlude: new Image()
+    };
+
+    this.backgroundRenderable.main.src = mainBackground;
+    this.backgroundRenderable.interlude.src = interludeBackground;
 
     // Initialize the canvas properties
     this.ctx.imageSmoothingEnabled = false;
@@ -330,19 +338,29 @@ function Render(canvas, ctx)
 
 Render.prototype.draw = function()
 {
-    this.ctx.fillStyle = "pink";
-    this.ctx.fillRect(0, 0, this.baseWidth, this.baseHeight);
+    // this.ctx.fillStyle = "pink";
+    // this.ctx.fillRect(0, 0, this.baseWidth, this.baseHeight);
     // this.ctx.clearRect(0, 0, this.baseWidth, this.baseHeight);
 
-    this.ctx.fillStyle = "black";
+    // this.ctx.fillStyle = "black";
+    this.ctx.translate(-this.camera.x, 0);
+    if (this.camera.x > -this.baseWidth)
+    {
+        this.ctx.drawImage(this.backgroundRenderable.main, 0, 0);
+    }
+
+    if (this.camera.player.x <= 0)
+    {
+        this.ctx.drawImage(this.backgroundRenderable.interlude, -this.baseWidth, 0);
+    }
+    
+    this.ctx.translate(this.camera.x, 0);
     
     for (let i = 0; i < this.renderable.length; i++)
     {
-        this.ctx.setTransform(1, 0, 0, 1, 0, 0);
-        this.ctx.translate(-this.camera.x, -this.camera.y);
-        this.ctx.scale(this.camera.zoom, this.camera.zoom);
+        this.ctx.translate(-this.camera.x, 0);
         this.renderable[i].draw(this.ctx);
-        this.ctx.translate(this.camera.x, this.camera.y);
+        this.ctx.translate(this.camera.x, 0);
     }
 }
 

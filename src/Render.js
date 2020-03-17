@@ -1,4 +1,6 @@
 const Camera = require("./Camera.js");
+const mainBackground = "./src/assets/art/main-background.png";
+const interludeBackground = "./src/assets/art/interlude-background.png";
 
 /**
  * Constructor function that handles rendering objects.
@@ -20,6 +22,13 @@ function Render(canvas, ctx)
     Render.prototype.viewHeight = 360;
     Render.prototype.renderable = [];
     Render.prototype.unrenderable = [];
+    Render.prototype.backgroundRenderable = {
+        main: new Image(),
+        interlude: new Image()
+    };
+
+    this.backgroundRenderable.main.src = mainBackground;
+    this.backgroundRenderable.interlude.src = interludeBackground;
 
     // Initialize the canvas properties
     this.ctx.imageSmoothingEnabled = false;
@@ -30,19 +39,29 @@ function Render(canvas, ctx)
 
 Render.prototype.draw = function()
 {
-    this.ctx.fillStyle = "pink";
-    this.ctx.fillRect(0, 0, this.baseWidth, this.baseHeight);
+    // this.ctx.fillStyle = "pink";
+    // this.ctx.fillRect(0, 0, this.baseWidth, this.baseHeight);
     // this.ctx.clearRect(0, 0, this.baseWidth, this.baseHeight);
 
-    this.ctx.fillStyle = "black";
+    // this.ctx.fillStyle = "black";
+    this.ctx.translate(-this.camera.x, 0);
+    if (this.camera.x > -this.baseWidth)
+    {
+        this.ctx.drawImage(this.backgroundRenderable.main, 0, 0);
+    }
+
+    if (this.camera.player.x <= 0)
+    {
+        this.ctx.drawImage(this.backgroundRenderable.interlude, -this.baseWidth, 0);
+    }
+    
+    this.ctx.translate(this.camera.x, 0);
     
     for (let i = 0; i < this.renderable.length; i++)
     {
-        this.ctx.setTransform(1, 0, 0, 1, 0, 0);
-        this.ctx.translate(-this.camera.x, -this.camera.y);
-        this.ctx.scale(this.camera.zoom, this.camera.zoom);
+        this.ctx.translate(-this.camera.x, 0);
         this.renderable[i].draw(this.ctx);
-        this.ctx.translate(this.camera.x, this.camera.y);
+        this.ctx.translate(this.camera.x, 0);
     }
 }
 
