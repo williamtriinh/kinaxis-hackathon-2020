@@ -54,11 +54,13 @@ Camera.prototype.update = function()
 module.exports = Camera;
 
 },{}],2:[function(require,module,exports){
-function FallingObject(x)
+function FallingObject(x, width, height)
 {
     // parameter x will be random
     this.x = x;
-    this.y = -50;
+    this.y = -height;
+    this.width = width;
+    this.height = height;
 
     // speed/gravity
     this.velocity = {
@@ -67,34 +69,29 @@ function FallingObject(x)
     }
 
     //low gravity
-    this.gravity = .05;
+    this.gravity = .03;
+    this.floorPosition = 720 - 64;
 };
 
 FallingObject.prototype.update = function()
 {
-    // if the object is not touching the bottom use gravity to bring it down
-    if(this.y < 720 - 64 - 50){
+    // Constantly apply gravity
+    this.velocity.y += this.gravity;
 
-        // exponential gravity
-        this.velocity.y += this.gravity;
-
-        // adding gracity plus speed of the object to drag it down
-        this.y += this.velocity.y;
-
-        // look at gravity and it changes through console
-        // console.log(this.gravity);
-    }
-    else
+    // Make sure the objects don't fall through the ground
+    if (this.y + this.height / 2 >= this.floorPosition)
     {
-        this.y = 720 - 64 - 50;
+        this.velocity.y = 0;
+        this.y = this.floorPosition - this.height / 2;
     }
+
     this.x += this.velocity.x;
+    this.y += this.velocity.y;
 }
 
 FallingObject.prototype.draw = function(ctx)
 {    
-    ctx.fillRect(this.x, this.y, 50, 50);
-
+    ctx.fillRect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height);
 };
 
 module.exports = FallingObject;
@@ -105,7 +102,7 @@ module.exports = FallingObject;
 const FallingObject = require("./FallingObject.js");
 
 // creating the array
-let FallingObjectArray = new Array;
+// let FallingObjectArray = new Array;
 // if true then it is a array 
 //FallingObjectArray.constructor === Array;
 
@@ -113,34 +110,62 @@ function FallingObjectManager()
 {
 
     //number of objects you want
-    let num = 10;
+    // let num = 10;
+    this.fallingObjectsArray = [];
 
-    // looping number of objects
-    for(i = 0; i < num; i++){
-        // adding elements to the array
-        // random x position 
-        FallingObjectArray[i] = new FallingObject(Math.floor(Math.random() * window.innerWidth - 50));
-    }
+    // // looping number of objects
+    // for(i = 0; i < num; i++){
+    //     // adding elements to the array
+    //     // random x position 
+    //     FallingObjectArray[i] = new FallingObject(Math.floor(Math.random() * window.innerWidth - 50));
+    // }
 
+    this.createFallingObject = this.createFallingObject.bind(this);
+
+    this.createFallingObject();
+
+    this.timer = setInterval(this.createFallingObject, 3000);
 };
+
+FallingObjectManager.prototype.createFallingObject = function()
+{
+    let width = 50;
+    let height = 50;
+    let x = Math.random() * window.innerWidth - width;
+    this.fallingObjectsArray.push(new FallingObject(x, width, height));
+}
     
 FallingObjectManager.prototype.update = function()
-{   
-    //
-    function up(i){
-        
+{
+    // Update the falling objects
+    for (let i = 0; i < this.fallingObjectsArray.length; i++)
+    {
+        this.fallingObjectsArray[i].update();
     }
-    for(i = 0; i < FallingObjectArray.length; i++){
-        setTimeout(FallingObjectArray[i].update(), i * 2000 + 2000, i);         
+
+    // Stop spawning
+    if (this.fallingObjectsArray.length >= 10 && this.timer !== null)
+    {
+        clearInterval(this.timer);
+        this.timer = null;
     }
-        //setTimeout(() => { clearInterval(timerId); alert('stop'); }, 5000);
+    //funciton for updating the objects position
+    // function up(i){
+    //     FallingObjectArray[i].update()
+    // }
+
+    // loop for all the objects
+    // for(i = 0; i < FallingObjectArray.length; i++){
+    //     setTimeout(up, i * 2000 + 2000, i); // when i * 2 seconds plus 2 seconds then run gravity
+    // }
 
 };
 
 FallingObjectManager.prototype.draw = function(ctx){
 
-    for(i=0; i < FallingObjectArray.length; i++){
-        FallingObjectArray[i].draw(ctx)        
+    // draw all the objects
+    for(i = 0; i < this.fallingObjectsArray.length; i++){
+        this.fallingObjectsArray[i].draw(ctx)        
     }
     
 }
@@ -205,7 +230,7 @@ const sprite = "./src/assets/art/player.png";
 function Player(keyboard)
 {
     this.x = 384;           // Start the player at half the game width
-    this.y = 0;
+    this.y = 720 - 64;
     this.width = 48;        // Should match the sprite width
     this.height = 48;
     this.velocity = {
@@ -213,8 +238,8 @@ function Player(keyboard)
         y: 0
     }
     this.index = 1;
-    this.maxHVelocity = 6;
-    this.acceleration = 0.8; // Applied to the horizontal only
+    this.maxHVelocity = 8;
+    this.acceleration = 0.9; // Applied to the horizontal only
     this.friction = 0.4;
     this.gravity = 1;
     this.jumpSpeed = 15;
@@ -295,7 +320,7 @@ Player.prototype.update = function()
 
     if (this.velocity.x) {
         this.sprite.rowIndex = 2 + this.sprite.dir;
-        this.sprite.animationSpeed = 0.25;
+        this.sprite.animationSpeed = 0.3;
     }
     else {
         this.sprite.rowIndex = 0 + this.sprite.dir;
