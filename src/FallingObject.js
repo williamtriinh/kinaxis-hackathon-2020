@@ -1,7 +1,7 @@
-function FallingObject()
+function FallingObject(x)
 {
         
-    this.x = 100;
+    this.x = x;
     this.y = 100;
 
     // speed/gravity
