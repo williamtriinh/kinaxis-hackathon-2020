@@ -1,34 +1,38 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
-function FallingObject(x)
-{        
-    this.posX = x;
-    this.posY = 100;
+function FallingObject()
+{
+        
+    this.x = 100;
+    this.y = 100;
 
     // speed/gravity
-    this.gravity = 0.005;
-    this.gravitySpeed = 0.5;
-    this.speed = 5;
+    this.velocity = {
+        x: 0,
+        y: 0
+    }
+    this.gravity = 1;
 };
 
 FallingObject.prototype.update = function()
 {
     // if the object is not touching the bottom use gravity to bring it down
-    if(this.posY < window.innerHeight - 50){
+    if(this.y < window.innerHeight - 50){
 
         // exponential gravity
-        this.gravity += this.posY * 0.0002
+        this.velocity.y += this.gravity;
 
         // adding gracity plus speed of the object to drag it down
-        this.posY += this.speed + this.gravity; 
+        this.y += this.velocity.y;
 
         // look at gravity and it changes through console
         // console.log(this.gravity);
     }
+    this.x += this.velocity.x;
 }
 
 FallingObject.prototype.draw = function(ctx)
 {    
-    ctx.fillRect(this.posX, this.posY, 50, 50);
+    ctx.fillRect(this.x, this.y, 50, 50);
 
 };
 
@@ -51,12 +55,16 @@ function FallingObjectManager()
 
 FallingObjectManager.prototype.update = function()
 {
-    setTimeout(function () { myarray[i].update(); i++}, 2000);
+    for(i = 0; i < 10; i++){
+        myarray[i].update();
+    }
 };
 
 FallingObjectManager.prototype.draw = function(ctx){
-    i = 0;
-    setTimeout(function () { myarray[i].draw(ctx); i++}, 2000);
+    for(i = 0; i < 10; i++){
+        myarray[i].draw(ctx);
+    }
+    
     
 }
 module.exports = FallingObjectManager;
@@ -118,7 +126,7 @@ function Player(keyboard)
         y: 0
     }
     this.maxHVelocity = 6;
-    this.acceleration = 0.8;
+    this.acceleration = 0.8; // Applied to the horizontal only
     this.friction = 0.4;
     this.gravity = 1;
     this.jumpSpeed = 20;
