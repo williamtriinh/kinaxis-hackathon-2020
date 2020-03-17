@@ -56,16 +56,18 @@ module.exports = Camera;
 },{}],2:[function(require,module,exports){
 function FallingObject(x)
 {
-        
+    // parameter x will be random
     this.x = x;
-    this.y = 100;
+    this.y = -50;
 
     // speed/gravity
     this.velocity = {
         x: 0,
         y: 0
     }
-    this.gravity = 1;
+
+    //low gravity
+    this.gravity = .05;
 };
 
 FallingObject.prototype.update = function()
@@ -101,36 +103,45 @@ module.exports = FallingObject;
 },{}],3:[function(require,module,exports){
 //require FallingObjects faile to draw objects
 const FallingObject = require("./FallingObject.js");
-var myarray = [];
+
+// creating the array
+let FallingObjectArray = new Array;
+// if true then it is a array 
+//FallingObjectArray.constructor === Array;
 
 function FallingObjectManager()
 {
-    //for(i = 0; i < 10; i++){
+
+    //number of objects you want
+    let num = 10;
+
+    // looping number of objects
+    for(i = 0; i < num; i++){
         // adding elements to the array
-        myarray[0] = new FallingObject(300);
-        myarray[1] = new FallingObject(200);
-        myarray[2] = new FallingObject(100);
+        // random x position 
+        FallingObjectArray[i] = new FallingObject(Math.floor(Math.random() * window.innerWidth - 50));
+    }
 
 };
-
+    
 FallingObjectManager.prototype.update = function()
 {   
-    i = 0
-    setTimeout(() => { myarray[0].update(ctx)}, 2000);      
-
+    //
+    function up(i){
+        
+    }
+    for(i = 0; i < FallingObjectArray.length; i++){
+        setTimeout(FallingObjectArray[i].update(), i * 2000 + 2000, i);         
+    }
         //setTimeout(() => { clearInterval(timerId); alert('stop'); }, 5000);
 
 };
 
 FallingObjectManager.prototype.draw = function(ctx){
 
-    setTimeout(() => { myarray[0].draw(ctx)}, 2000);      
-    // i = 0;
-    // while(i < 3){
-    //     setInterval(myarray[i].draw(ctx), 2000);   
-    //     console.log(i);
-    //     i++;
-    // }
+    for(i=0; i < FallingObjectArray.length; i++){
+        FallingObjectArray[i].draw(ctx)        
+    }
     
 }
 module.exports = FallingObjectManager;  

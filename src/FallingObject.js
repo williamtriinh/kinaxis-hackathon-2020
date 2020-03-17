@@ -1,15 +1,17 @@
 function FallingObject(x)
 {
-        
+    // parameter x will be random
     this.x = x;
-    this.y = 100;
+    this.y = -50;
 
     // speed/gravity
     this.velocity = {
         x: 0,
         y: 0
     }
-    this.gravity = 1;
+
+    //low gravity
+    this.gravity = .05;
 };
 
 FallingObject.prototype.update = function()
