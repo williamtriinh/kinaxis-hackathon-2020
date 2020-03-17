@@ -3,6 +3,11 @@
     <head>
         <title>Kinaxis Hackathon 2020</title>
         <style>
+            @font-face {
+                font-family: "Pixelated";
+                src: url("/src/assets/fonts/Pixelated.ttf");
+            }
+
             * {
                 margin: 0;
                 padding: 0;
@@ -12,15 +17,57 @@
             body {
                 overflow: hidden;
                 background-color: black;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                font-family: "Pixelated";
+                text-transform: uppercase;
+            }
+
+            .game {
+                display: block;
             }
 
             canvas {
-                display: block;
-                margin: 0 auto;
+                display: none;
+                width: 100%;
+                height: 100%;
+            }
+
+            .game__menu {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                background-color: lightblue;
+                width: 100%;
+                height: 100%;
+            }
+
+            .menu__button {
+                text-align: center;
+                width: 200px;
+                padding: 4px 0;
+                margin: 8px 0 0 0;
+                font-size: 0.6em;
+                background-color: lime;
+                color: white;
+            }
+
+            .menu__button:hover {
+                cursor: pointer;
+                background-color: green;
             }
         </style>
     </head>
     <body>
+        <div class="game">
+            <div class="game__menu">
+                <p class="menu__button" id="menu--play-btn">Play</p>
+                <p class="menu__button" id="menu--settings-btn">Settings</p>
+                <p class="menu__button" id="menu--help-btn">Help</p>
+            </div>
+            
+        </div>
         <script type="text/javascript" src="bundle.js"></script>
     </body>
 </html>

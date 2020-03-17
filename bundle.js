@@ -333,7 +333,7 @@ function Render(canvas, ctx)
     this.ctx.imageSmoothingEnabled = false;
     this.canvas.width = this.baseWidth;
     this.canvas.height = this.baseHeight;
-    this.resizeCanvas();
+    this.resizeGame();
 }
 
 Render.prototype.draw = function()
@@ -364,24 +364,34 @@ Render.prototype.draw = function()
     }
 }
 
-Render.prototype.resizeCanvas = function()
+Render.prototype.resizeGame = function()
 {
     let winWidth = window.innerWidth;
     let winHeight = window.innerHeight;
     let aspectRatio = this.baseWidth / this.baseHeight;
 
+    let game = document.getElementsByClassName("game")[0];
+
     // Scale the canvas so that it's always the same aspect ratio
     if (winHeight * aspectRatio > winWidth) {
-        this.canvas.style.width = winWidth + "px";
-        this.canvas.style.height = winWidth / aspectRatio + "px";
-        this.viewWidth = winWidth;
-        this.viewHeight = winWidth / aspectRatio;
+        game.style.width = winWidth + "px";
+        game.style.height = winWidth / aspectRatio + "px";
+        // this.canvas.style.width = winWidth + "px";
+        // this.canvas.style.height = winWidth / aspectRatio + "px";
+        // menu.style.width = this.canvas.style.width;
+        // menu.style.height = this.canvas.style.height;
+        // this.viewWidth = winWidth;
+        // this.viewHeight = winWidth / aspectRatio;
     }
     else {
-        this.canvas.style.width = winHeight * aspectRatio + "px";
-        this.canvas.style.height = winHeight + "px";
-        this.viewWidth = winHeight * aspectRatio;
-        this.viewHeight = winHeight;
+        game.style.width = winHeight * aspectRatio + "px";
+        game.style.height = winHeight + "px";
+        // this.canvas.style.width = winHeight * aspectRatio + "px";
+        // this.canvas.style.height = winHeight + "px";
+        // menu.style.width = this.canvas.style.width;
+        // menu.style.height = this.canvas.style.height;
+        // this.viewWidth = winHeight * aspectRatio;
+        // this.viewHeight = winHeight;
     }
 }
 
@@ -406,7 +416,7 @@ const ctx = canvas.getContext("2d");
 
 window.addEventListener("load", () => {
 
-    document.body.appendChild(canvas);
+    document.getElementsByClassName("game")[0].appendChild(canvas);
 
     // Instantiate the game components
     const keyboard = new Keyboard();
@@ -459,7 +469,7 @@ window.addEventListener("load", () => {
         }
     });
 
-    window.addEventListener("resize", () => render.resizeCanvas());
+    window.addEventListener("resize", () => render.resizeGame());
     
     game.init();
 

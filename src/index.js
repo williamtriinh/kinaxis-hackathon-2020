@@ -17,7 +17,7 @@ const ctx = canvas.getContext("2d");
 
 window.addEventListener("load", () => {
 
-    document.body.appendChild(canvas);
+    document.getElementsByClassName("game")[0].appendChild(canvas);
 
     // Instantiate the game components
     const keyboard = new Keyboard();
@@ -70,7 +70,7 @@ window.addEventListener("load", () => {
         }
     });
 
-    window.addEventListener("resize", () => render.resizeCanvas());
+    window.addEventListener("resize", () => render.resizeGame());
     
     game.init();
 
