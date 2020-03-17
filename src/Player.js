@@ -10,13 +10,14 @@ function Player(keyboard)
         x: 0,
         y: 0
     }
+    this.index = 1;
     this.maxHVelocity = 6;
     this.acceleration = 0.8; // Applied to the horizontal only
     this.friction = 0.4;
     this.gravity = 1;
     this.jumpSpeed = 15;
     this.isGrounded = true;
-    this.floorPosition = 720; // The height at which the "floor" is
+    this.floorPosition = 720 - 64; // The height at which the "floor" is
     this.keyboard = keyboard;
 
     this.sprite = {
@@ -62,27 +63,22 @@ Player.prototype.update = function()
 
     // Apply horizontal acceleration to the player
     this.velocity.x += horDirection * this.acceleration;
+    this.velocity.y += this.gravity;
 
     if (this.velocity.x >= this.maxHVelocity || this.velocity.x <= -this.maxHVelocity)
     {
         this.velocity.x = this.maxHVelocity * horDirection;
     }
 
-    //  Apply gravity when the player is not grounded
-    if (this.y + this.height / 2 < this.floorPosition)
-    {
-        this.velocity.y += this.gravity; // gravity
-    }
-    else
-    {
+    // Make sure the player doesn't pass the floor
+    if (this.y + this.height / 2 + this.velocity.y >= this.floorPosition) {
         this.velocity.y = 0;
         this.y = this.floorPosition - this.height / 2;
     }
 
-    // Allow the player to jump when they're grounded
-    if (this.y + this.height / 2 + 1 >= this.floorPosition)
+    if (this.y + this.height / 2 + 2 >= this.floorPosition)
     {
-        this.velocity.y -= this.jumpSpeed * up;
+        this.velocity.y -= up * this.jumpSpeed;
     }
 
     // Update the player's position
