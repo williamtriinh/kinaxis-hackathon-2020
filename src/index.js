@@ -71,7 +71,12 @@ window.addEventListener("load", () => {
     });
 
     window.addEventListener("resize", () => render.resizeGame());
-    
-    game.init();
+
+    // When the play button is pressed
+    document.getElementById("menu__play-btn").addEventListener("click", () => {
+        document.getElementsByClassName("game__menu")[0].style["display"] = "none";
+        document.querySelector("canvas").style["display"] = "block";
+        game.init();
+    });
 
 });
