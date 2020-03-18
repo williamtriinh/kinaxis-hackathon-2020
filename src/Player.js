@@ -70,15 +70,14 @@ Player.prototype.update = function()
         this.velocity.x = this.maxHVelocity * horDirection;
     }
 
+    if (this.y + this.height / 2 + 2 >= this.floorPosition) {
+        this.velocity.y -= up * this.jumpSpeed;
+    }
+
     // Make sure the player doesn't pass the floor
     if (this.y + this.height / 2 + this.velocity.y >= this.floorPosition) {
         this.velocity.y = 0;
         this.y = this.floorPosition - this.height / 2;
-    }
-
-    if (this.y + this.height / 2 + 2 >= this.floorPosition)
-    {
-        this.velocity.y -= up * this.jumpSpeed;
     }
 
     // Update the player's position
