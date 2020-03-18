@@ -3,7 +3,7 @@ const sprite = "./src/assets/art/player.png";
 function Player(keyboard)
 {
     this.x = 384;           // Start the player at half the game width
-    this.y = 0;
+    this.y = 720 - 64;
     this.width = 48;        // Should match the sprite width
     this.height = 48;
     this.velocity = {
@@ -11,8 +11,8 @@ function Player(keyboard)
         y: 0
     }
     this.index = 1;
-    this.maxHVelocity = 6;
-    this.acceleration = 0.8; // Applied to the horizontal only
+    this.maxHVelocity = 8;
+    this.acceleration = 0.9; // Applied to the horizontal only
     this.friction = 0.4;
     this.gravity = 1;
     this.jumpSpeed = 15;
@@ -93,7 +93,7 @@ Player.prototype.update = function()
 
     if (this.velocity.x) {
         this.sprite.rowIndex = 2 + this.sprite.dir;
-        this.sprite.animationSpeed = 0.25;
+        this.sprite.animationSpeed = 0.3;
     }
     else {
         this.sprite.rowIndex = 0 + this.sprite.dir;

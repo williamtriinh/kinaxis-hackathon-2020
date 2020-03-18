@@ -1,42 +1,41 @@
-function FallingObject()
+function FallingObject(x, width, height)
 {
-        
-    this.x = 100;
-    this.y = 100;
+    // parameter x will be random
+    this.x = x;
+    this.y = -height;
+    this.width = width;
+    this.height = height;
 
     // speed/gravity
     this.velocity = {
         x: 0,
         y: 0
     }
-    this.gravity = 1;
+
+    //low gravity
+    this.gravity = .03;
+    this.floorPosition = 720 - 64;
 };
 
 FallingObject.prototype.update = function()
 {
-    // if the object is not touching the bottom use gravity to bring it down
-    if(this.y < 720 - 64 - 50){
+    // Constantly apply gravity
+    this.velocity.y += this.gravity;
 
-        // exponential gravity
-        this.velocity.y += this.gravity;
-
-        // adding gracity plus speed of the object to drag it down
-        this.y += this.velocity.y;
-
-        // look at gravity and it changes through console
-        // console.log(this.gravity);
-    }
-    else
+    // Make sure the objects don't fall through the ground
+    if (this.y + this.height / 2 >= this.floorPosition)
     {
-        this.y = 720 - 64 - 50;
+        this.velocity.y = 0;
+        this.y = this.floorPosition - this.height / 2;
     }
+
     this.x += this.velocity.x;
+    this.y += this.velocity.y;
 }
 
 FallingObject.prototype.draw = function(ctx)
 {    
-    ctx.fillRect(this.x, this.y, 50, 50);
-
+    ctx.fillRect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height);
 };
 
 module.exports = FallingObject;
