@@ -17,7 +17,7 @@ const ctx = canvas.getContext("2d");
 
 window.addEventListener("load", () => {
 
-    document.body.appendChild(canvas);
+    document.getElementsByClassName("game")[0].appendChild(canvas);
 
     // Instantiate the game components
     const keyboard = new Keyboard();
@@ -70,8 +70,13 @@ window.addEventListener("load", () => {
         }
     });
 
-    window.addEventListener("resize", () => render.resizeCanvas());
-    
-    game.init();
+    window.addEventListener("resize", () => render.resizeGame());
+
+    // When the play button is pressed
+    document.getElementById("menu__play-btn").addEventListener("click", () => {
+        document.getElementsByClassName("game__menu")[0].style["display"] = "none";
+        document.querySelector("canvas").style["display"] = "block";
+        game.init();
+    });
 
 });

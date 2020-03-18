@@ -3,6 +3,11 @@
     <head>
         <title>Kinaxis Hackathon 2020</title>
         <style>
+            @font-face {
+                font-family: "MatchupPro";
+                src: url("/src/assets/fonts/MatchupPro.ttf");
+            }
+
             * {
                 margin: 0;
                 padding: 0;
@@ -12,15 +17,123 @@
             body {
                 overflow: hidden;
                 background-color: black;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                font-family: "MatchupPro";
+                text-transform: uppercase;
+                user-select: none;
+                -webkit-user-select: none;
+                -webkit-user-drag: none;
+            }
+
+            .game {
+                display: block;
             }
 
             canvas {
-                display: block;
-                margin: 0 auto;
+                display: none;
+                width: 100%;
+                height: 100%;
+            }
+
+            .game__menu {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: flex-end;
+                background-color: lightblue;
+                width: 100%;
+                height: 100%;
+                background-image: url("/src/assets/art/menu.png");
+                background-repeat: none;
+                background-size: cover;
+            }
+
+            .game__menu__btn-wrapper
+            {
+                width: 25%;
+                margin-right: 5%;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .title {
+                color: #f2a65e;
+                margin-bottom: 10%;
+            }
+
+            .menu__button {
+                text-align: center;
+                width: 60%;
+                padding: 4px 0;
+                margin-bottom: 2%;
+                background-color: #f2a65e;
+                color: white;
+            }
+
+            .link {
+                text-decoration: none;
+                color: white;
+                font-size: 3vh;
+            }
+
+            .link:hover {
+                color: #c2c2d1;
+            }
+
+            @media (orientation: landscape)
+            {
+                .title {
+                    font-size: 7vh;
+                }
+
+                .menu__button {
+                    font-size: 4vh;
+                }
+
+                .link {
+                    font-size: 3vh;
+                }
+
+            }
+
+            @media (orientation: portrait)
+            {
+                .title {
+                    font-size: 5vw;
+                }
+
+                .menu__button {
+                    font-size: 3vw;
+                }
+
+                .link {
+                    font-size: 2vw;
+                }
+            }
+
+            .menu__button:hover {
+                cursor: pointer;
+                background-color: #ba6156;
             }
         </style>
     </head>
     <body>
+        <div class="game">
+            <div class="game__menu">
+                <div class="game__menu__btn-wrapper">
+                    <p class="title">Game_Name</p>
+                    <p class="menu__button" id="menu__play-btn">Play</p>
+                    <p class="menu__button" id="menu__settings-btn">Settings</p>
+                    <p class="menu__button" id="menu__help-btn">Help</p>
+                    <div style="height: 36px;"></div>
+                    <a href="https://github.com/williamtriinh/kinaxis-hackathon-2020" bla class="link">Github</a>
+                </div>
+            </div>
+            
+        </div>
         <script type="text/javascript" src="bundle.js"></script>
     </body>
 </html>
