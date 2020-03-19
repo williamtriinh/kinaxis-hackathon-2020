@@ -24,24 +24,33 @@ window.addEventListener("load", () => {
     const fallingObjectsManager = new FallingObjectManager();
     const game = new Game(render, player, keyboard, fallingObjectsManager);
 
+    window.addEventListener("keypress", (ev) => {
+        switch (ev.code)
+        {
+            case "KeyE":
+                Keyboard.prototype.use = 1;
+                break;
+        }
+    });
+
     window.addEventListener("keydown", (ev) => {
         switch (ev.code) {
             case "KeyW":
             case "ArrowUp":
             case "Space":
-                keyboard.up = 1;
+                Keyboard.prototype.up = 1;
                 break;
             case "KeyS":
             case "ArrowDown":
-                keyboard.down = 1;
+                Keyboard.prototype.down = 1;
                 break;
             case "KeyA":
             case "ArrowLeft":
-                keyboard.left = 1;
+                Keyboard.prototype.left = 1;
                 break;
             case "KeyD":
             case "ArrowRight":
-                keyboard.right = 1;
+                Keyboard.prototype.right = 1;
                 break;
         }
     });
@@ -51,19 +60,19 @@ window.addEventListener("load", () => {
             case "KeyW":
             case "ArrowUp":
             case "Space":
-                keyboard.up = 0;
+                Keyboard.prototype.up = 0;
                 break;
             case "KeyS":
             case "ArrowDown":
-                keyboard.down = 0;
+                Keyboard.prototype.down = 0;
                 break;
             case "KeyA":
             case "ArrowLeft":
-                keyboard.left = 0;
+                Keyboard.prototype.left = 0;
                 break;
             case "KeyD":
             case "ArrowRight":
-                keyboard.right = 0;
+                Keyboard.prototype.right = 0;
                 break;
         }
     });

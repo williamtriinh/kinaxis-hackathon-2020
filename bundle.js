@@ -1,4 +1,92 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+const basketsSprite = "/src/assets/art/baskets.png";
+
+function Basket(player, keyboard) {
+
+    this.x = 640;
+    this.y = 720 - 24;
+    this.height = 48;
+    this.width = 48;
+    this.floor = 720 - 64 - this.height / 2;
+
+    Basket.prototype.isCarried = false;
+    Basket.prototype.sprite = {
+        image: new Image(),
+        index: 0                    // Which basket we're using
+    }
+    
+    this.sprite.image.src = basketsSprite;
+
+    this.player = player;
+    this.keyboard = keyboard;
+}
+
+Basket.prototype.update = function () {
+
+    // window.addEventListener("keyup", (e) => {
+
+    //     // checking position of this.x to see if in range and this.y to see if I can pick up the basket
+    //     if (this.player.x > this.x - 200 && this.player.x < this.x + 200 
+    //         && e.keyCode == 69 && this.y == this.floor) {
+    //         this.y = this.player.y - this.player.height*2;
+
+    //     }
+    //     // if i can't pick it up can I place it down
+    //     else if(this.y != this.floor && e.keyCode == 69){
+    //         this.y = this.floor
+    //     }
+       
+    // }
+    // )
+
+    if (this.keyboard.use === 1)
+    {
+        // checking position of this.x to see if in range and this.y to see if I can pick up the basket
+        if (this.player.x > this.x - this.width && this.player.x < this.x + this.width) {
+            Basket.prototype.isCarried = !this.isCarried;
+        }
+    }
+
+    if (this.isCarried)
+    {
+        // Follow the player
+        this.x = this.player.x;
+        this.y = this.player.y - this.player.height;
+    }
+    else
+    {
+        // Stay on the ground
+        this.y = this.floor;
+    }
+    
+}
+
+
+Basket.prototype.draw = function (ctx) {
+
+    ctx.font = "20px Arial";
+
+    // display font when player is in range of the basket
+    if (this.player.x > this.x - this.width && this.player.x < this.x + this.width && this.y == this.floor) {
+        ctx.fillText("Press e to Pick Up", this.x, 540);
+    }
+
+    // ctx.fillRect(this.x, this.y, this.width, this.height);
+    ctx.drawImage(
+        this.sprite.image,
+        this.sprite.index * this.width,
+        0,
+        this.width,
+        this.height,
+        this.x - this.width / 2,
+        this.y - this.height / 2,
+        this.width,
+        this.height
+    );
+}
+
+module.exports = Basket;
+},{}],2:[function(require,module,exports){
 /** 
  * Handles all camera related actions
  * 
@@ -53,8 +141,6 @@ Camera.prototype.update = function()
 
 module.exports = Camera;
 
-},{}],2:[function(require,module,exports){
-function FallingObject(x, width, height, image)
 {
     // parameter x will be random
     this.x = x;
@@ -97,7 +183,6 @@ FallingObject.prototype.draw = function(ctx)
 };
 
 module.exports = FallingObject;
-
 
 },{}],3:[function(require,module,exports){
 const FallingObject = require("./FallingObject.js");
@@ -225,7 +310,7 @@ FallingObjectManager.prototype.draw = function(ctx){
 }
 module.exports = FallingObjectManager;  
 
-},{"./FallingObject.js":2}],4:[function(require,module,exports){
+},{"./FallingObject.js":3}],5:[function(require,module,exports){
 /**
  * Manages the GUI.
  */
@@ -253,6 +338,10 @@ module.exports = GUI;
  * 
  * The code here shouldn't be touched.
  */
+const Basket = require("./Basket.js");
+const Keyboard = require("./Keyboard.js");
+
+let key = new Keyboard();
 
  const GUI = require("./GUI.js");
 
@@ -262,20 +351,22 @@ function Game(render, player, keyboard, fallingObjectsManager)
     this.player = player;
     this.keyboard = keyboard;
     this.fallingObjectsManager = fallingObjectsManager;
+    this.basket = new Basket(player, keyboard);
+    this.camera = this.render.camera;
     this.gui = new GUI;
+
     this.loopId = undefined;
-    this.camera = undefined;
 }
 
 Game.prototype.init = function()
 {
     this.update = this.update.bind(this);
 
-    this.camera = this.render.camera;
     this.camera.attach(this.player);
 
-    this.render.renderable.push(this.player);
     this.render.renderable.push(this.fallingObjectsManager);
+    this.render.renderable.push(this.basket);
+    this.render.renderable.push(this.player);
 
     // Begin falling objects
     this.fallingObjectsManager.start();
@@ -286,14 +377,18 @@ Game.prototype.init = function()
 
 Game.prototype.update = function()
 {
-    this.player.update();
     this.camera.update();
     this.fallingObjectsManager.update();
+    this.basket.update();
+    this.player.update();
+
+    Keyboard.prototype.use = 0;
+
     this.render.draw();
 };
 
 module.exports = Game;
-},{"./GUI.js":4}],6:[function(require,module,exports){
+
 function Keyboard()
 {
     // These values will be either 0 or 1.
@@ -303,6 +398,11 @@ Keyboard.prototype.left = 0;
 Keyboard.prototype.right = 0;
 Keyboard.prototype.down = 0;
 Keyboard.prototype.up = 0;
+Keyboard.prototype.use = 0;
+
+Keyboard.prototype.reset = function() {
+    this.use = 0;
+}
 
 module.exports = Keyboard;
 },{}],7:[function(require,module,exports){
@@ -528,7 +628,7 @@ Render.prototype.resizeGame = function()
 }
 
 module.exports = Render;
-},{"./Camera.js":1}],9:[function(require,module,exports){
+
 /**
  * The "entry" file where the canvas is created and the different components
  * that make up the game (such as the Game, Render) are instantiated.
@@ -555,24 +655,33 @@ window.addEventListener("load", () => {
     const fallingObjectsManager = new FallingObjectManager();
     const game = new Game(render, player, keyboard, fallingObjectsManager);
 
+    window.addEventListener("keypress", (ev) => {
+        switch (ev.code)
+        {
+            case "KeyE":
+                Keyboard.prototype.use = 1;
+                break;
+        }
+    });
+
     window.addEventListener("keydown", (ev) => {
         switch (ev.code) {
             case "KeyW":
             case "ArrowUp":
             case "Space":
-                keyboard.up = 1;
+                Keyboard.prototype.up = 1;
                 break;
             case "KeyS":
             case "ArrowDown":
-                keyboard.down = 1;
+                Keyboard.prototype.down = 1;
                 break;
             case "KeyA":
             case "ArrowLeft":
-                keyboard.left = 1;
+                Keyboard.prototype.left = 1;
                 break;
             case "KeyD":
             case "ArrowRight":
-                keyboard.right = 1;
+                Keyboard.prototype.right = 1;
                 break;
         }
     });
@@ -582,19 +691,19 @@ window.addEventListener("load", () => {
             case "KeyW":
             case "ArrowUp":
             case "Space":
-                keyboard.up = 0;
+                Keyboard.prototype.up = 0;
                 break;
             case "KeyS":
             case "ArrowDown":
-                keyboard.down = 0;
+                Keyboard.prototype.down = 0;
                 break;
             case "KeyA":
             case "ArrowLeft":
-                keyboard.left = 0;
+                Keyboard.prototype.left = 0;
                 break;
             case "KeyD":
             case "ArrowRight":
-                keyboard.right = 0;
+                Keyboard.prototype.right = 0;
                 break;
         }
     });
@@ -610,4 +719,4 @@ window.addEventListener("load", () => {
     });
 
 });
-},{"./FallingObjectManager.js":3,"./Game.js":5,"./Keyboard.js":6,"./Player.js":7,"./Render.js":8}]},{},[9]);
+

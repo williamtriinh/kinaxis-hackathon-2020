@@ -4,6 +4,10 @@
  * 
  * The code here shouldn't be touched.
  */
+const Basket = require("./Basket.js");
+const Keyboard = require("./Keyboard.js");
+
+let key = new Keyboard();
 
  const GUI = require("./GUI.js");
 
@@ -13,20 +17,21 @@ function Game(render, player, keyboard, fallingObjectsManager)
     this.player = player;
     this.keyboard = keyboard;
     this.fallingObjectsManager = fallingObjectsManager;
+    this.basket = new Basket(player, keyboard);
+    this.camera = this.render.camera;
     this.gui = new GUI;
     this.loopId = undefined;
-    this.camera = undefined;
 }
 
 Game.prototype.init = function()
 {
     this.update = this.update.bind(this);
 
-    this.camera = this.render.camera;
     this.camera.attach(this.player);
 
-    this.render.renderable.push(this.player);
     this.render.renderable.push(this.fallingObjectsManager);
+    this.render.renderable.push(this.basket);
+    this.render.renderable.push(this.player);
 
     // Begin falling objects
     this.fallingObjectsManager.start();
@@ -37,9 +42,13 @@ Game.prototype.init = function()
 
 Game.prototype.update = function()
 {
-    this.player.update();
     this.camera.update();
     this.fallingObjectsManager.update();
+    this.basket.update();
+    this.player.update();
+
+    Keyboard.prototype.use = 0;
+
     this.render.draw();
 };
 
