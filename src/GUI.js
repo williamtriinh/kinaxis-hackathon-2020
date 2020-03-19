@@ -13,6 +13,7 @@ GUI.prototype.health = document.getElementById("health-bar__bar");
  */
 GUI.prototype.updateHealth = function(x)
 {
+    this.health.style.clipPath = `inset(0 ${100 * x}% 0 0)`;
     this.health.style.webkitClipPath = `inset(0 ${100 * x}% 0 0)`;
     GUI.prototype.healthValue += 0.001;
 }
