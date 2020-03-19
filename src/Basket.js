@@ -1,39 +1,46 @@
-function Basket(player) {
+const basketsSprite = "/src/assets/art/baskets.png";
 
-    this.x = window.innerWidth - 200;
-    this.y = 586;
-    this.height = 70;
-    this.width = 20;
+function Basket(player, keyboard) {
 
-    this.floor = 586;
+    this.x = 640;
+    this.y = 720 - 24;
+    this.height = 48;
+    this.width = 48;
+    this.floor = 720 - 64 - this.height / 2;
+
+    Basket.prototype.isCarried = false;
+    Basket.prototype.isNearby = false;          // Whether the player is near the container.
+    Basket.prototype.sprite = {
+        image: new Image(),
+        index: 0                    // Which basket we're using
+    }
     
-    this.player = player
+    this.sprite.image.src = basketsSprite;
+
+    this.player = player;
+    this.keyboard = keyboard;
 }
 
 Basket.prototype.update = function () {
 
-    window.addEventListener("keyup", (e) => {
-
+    if (this.keyboard.use === 1)
+    {
         // checking position of this.x to see if in range and this.y to see if I can pick up the basket
-        if (this.player.x > this.x - 200 && this.player.x < this.x + 200 
-            && e.keyCode == 69 && this.y == this.floor) {
-            this.y = this.player.y - this.player.height*2;
-
+        if (this.player.x > this.x - this.width && this.player.x < this.x + this.width) {
+            Basket.prototype.isCarried = !this.isCarried;
         }
-        // if i can't pick it up can I place it down
-        else if(this.y != this.floor && e.keyCode == 69){
-            this.y = this.floor
-        }
-       
     }
-    )
-    
-    // if player has picked up the object
-    if(this.y != this.floor){
 
-        // make sure it is always on top of him
+    if (this.isCarried)
+    {
+        // Follow the player
         this.x = this.player.x;
-        this.y = this.player.y - this.player.height*2;
+        this.y = this.player.y - this.player.height;
+    }
+    else
+    {
+        // Stay on the ground
+        this.y = this.floor;
     }
     
 }
@@ -41,14 +48,28 @@ Basket.prototype.update = function () {
 
 Basket.prototype.draw = function (ctx) {
 
-            ctx.font = "20px Arial";
+    ctx.font = "20px Arial";
 
-            // display font when player is in range of the basket
-            if (this.player.x > this.x - 100 && this.player.x < this.x + 100 && this.y == this.floor) {
-                ctx.fillText("Press e to Pick Up", this.x, 540);
-            }
-
-            ctx.fillRect(this.x, this.y, this.width, this.height);
+    // Display the ui indicator
+    if (this.player.x > this.x - this.width && this.player.x < this.x + this.width) {
+        if (!this.isNearby)
+        {
+            // 
         }
+    }
+
+    // ctx.fillRect(this.x, this.y, this.width, this.height);
+    ctx.drawImage(
+        this.sprite.image,
+        this.sprite.index * this.width,
+        0,
+        this.width,
+        this.height,
+        this.x - this.width / 2,
+        this.y - this.height / 2,
+        this.width,
+        this.height
+    );
+}
 
 module.exports = Basket;
