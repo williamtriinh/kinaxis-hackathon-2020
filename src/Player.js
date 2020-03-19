@@ -2,7 +2,7 @@ const sprite = "./src/assets/art/player.png";
 
 function Player(keyboard)
 {
-    this.x = 384;           // Start the player at half the game width
+    this.x = 640;           // Start the player at half the game width
     this.y = 720 - 64;
     this.width = 48;        // Should match the sprite width
     this.height = 48;

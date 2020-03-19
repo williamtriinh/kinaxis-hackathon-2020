@@ -1,38 +1,99 @@
-//require FallingObjects faile to draw objects
 const FallingObject = require("./FallingObject.js");
-
-// creating the array
-// let FallingObjectArray = new Array;
-// if true then it is a array 
-//FallingObjectArray.constructor === Array;
+const smallFallingObjectSprites = "/src/assets/art/small-falling-objects.png";
+const powerupsSprites = "/src/assets/art/powerups.png";
 
 function FallingObjectManager()
 {
-
-    //number of objects you want
-    // let num = 10;
-    this.fallingObjectsArray = [];
-
-    // // looping number of objects
-    // for(i = 0; i < num; i++){
-    //     // adding elements to the array
-    //     // random x position 
-    //     FallingObjectArray[i] = new FallingObject(Math.floor(Math.random() * window.innerWidth - 50));
+    this.fallingObjectSprites = [
+        {
+            // Small falling objects
+            image: new Image(),
+            length: 5, // How many different sprites there are in the spritesheet
+            size: [[8, 10], [8, 16], [14, 12], [10, 10], [8, 6]]    // The width/height of the sprites, by a factor of 1/3
+                                                                    // (not including white-space).
+        },
+        {
+            // Powerups
+            image: new Image(),
+            length: 2,
+            size: [[16, 16], [16, 16]]
+        },
+        // {
+        //     image: new Image(),
+        //     length: 2
+        // },
+        // {
+        //     image: new Image(),
+        //     length: 2
+        // }
+    ];
+    //     small: {
+    //         image: new Image(),
+    //         length: 5, // How many different sprites there are in the spritesheet
+    //         size: [[8, 10], [8, 16], [14, 12], [10, 10], [8, 6]]    // The width/height of the sprites
+    //                                                                 // (not including white-space)
+    //     },
+    //     large: {
+    //         image: new Image(),
+    //         length: 2
+    //     },
+    //     powerups: {
+    //         image: new Image(),
+    //         length: 2
+    //     },
+    //     powerdowns: {
+    //         image: new Image(),
+    //         length: 2
+    //     }
     // }
+    this.fallingObjectsArray = [];      // Contains all the visible falling objects in the game
 
+    // Binds
     this.createFallingObject = this.createFallingObject.bind(this);
 
-    this.createFallingObject();
+    // Image sources
+    this.fallingObjectSprites[0].image.src = smallFallingObjectSprites;
+    this.fallingObjectSprites[1].image.src = powerupsSprites;
 
-    this.timer = setInterval(this.createFallingObject, 3000);
+    // Create the initial falling object and begin the timer
 };
+
+FallingObjectManager.prototype.start = function()
+{
+    this.createFallingObject();
+    this.timer = setInterval(this.createFallingObject, 3000);
+}
 
 FallingObjectManager.prototype.createFallingObject = function()
 {
-    let width = 50;
-    let height = 50;
-    let x = Math.random() * window.innerWidth - width;
-    this.fallingObjectsArray.push(new FallingObject(x, width, height));
+    let sprite = this.fallingObjectSprites[Math.floor(Math.random() * this.fallingObjectSprites.length)];
+    let spriteIndex = Math.floor(Math.random() * sprite.length);
+    let width = sprite.size[spriteIndex][0] * 3;
+    let height = sprite.size[spriteIndex][1] * 3;
+    let x = Math.random() * (window.innerWidth - width);
+    let flip = (Math.floor((Math.random() * 2)) === 0) ? true : false;
+
+    let image = document.createElement("canvas").getContext("2d");
+    image.canvas.width = width;
+    image.canvas.height = height;
+    
+    if (flip)
+    {
+        image.scale(-1, 1);             // Flip the image
+        image.translate(-width, 0);     // Offset because of the flip
+    }
+    image.drawImage(
+        sprite.image,
+        spriteIndex * 48 + (48 - width) / 2,
+        (48 - height) / 2,
+        width,
+        height,
+        0,
+        0,
+        width,
+        height
+    );
+    this.fallingObjectsArray.push(new FallingObject(x, width, height, image.canvas));
 }
     
 FallingObjectManager.prototype.update = function()
@@ -49,15 +110,6 @@ FallingObjectManager.prototype.update = function()
         clearInterval(this.timer);
         this.timer = null;
     }
-    //funciton for updating the objects position
-    // function up(i){
-    //     FallingObjectArray[i].update()
-    // }
-
-    // loop for all the objects
-    // for(i = 0; i < FallingObjectArray.length; i++){
-    //     setTimeout(up, i * 2000 + 2000, i); // when i * 2 seconds plus 2 seconds then run gravity
-    // }
 
 };
 

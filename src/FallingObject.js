@@ -1,10 +1,11 @@
-function FallingObject(x, width, height)
+function FallingObject(x, width, height, image)
 {
     // parameter x will be random
     this.x = x;
     this.y = -height;
     this.width = width;
     this.height = height;
+    this.image = image;
 
     // speed/gravity
     this.velocity = {
@@ -23,7 +24,7 @@ FallingObject.prototype.update = function()
     this.velocity.y += this.gravity;
 
     // Make sure the objects don't fall through the ground
-    if (this.y + this.height / 2 >= this.floorPosition)
+    if (this.y + this.velocity.y + this.height / 2 >= this.floorPosition)
     {
         this.velocity.y = 0;
         this.y = this.floorPosition - this.height / 2;
@@ -35,7 +36,8 @@ FallingObject.prototype.update = function()
 
 FallingObject.prototype.draw = function(ctx)
 {    
-    ctx.fillRect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height);
+    // ctx.fillRect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height);
+    ctx.drawImage(this.image, this.x - this.width / 2, this.y - this.height / 2);
 };
 
 module.exports = FallingObject;

@@ -54,13 +54,14 @@ Camera.prototype.update = function()
 module.exports = Camera;
 
 },{}],2:[function(require,module,exports){
-function FallingObject(x, width, height)
+function FallingObject(x, width, height, image)
 {
     // parameter x will be random
     this.x = x;
     this.y = -height;
     this.width = width;
     this.height = height;
+    this.image = image;
 
     // speed/gravity
     this.velocity = {
@@ -79,7 +80,7 @@ FallingObject.prototype.update = function()
     this.velocity.y += this.gravity;
 
     // Make sure the objects don't fall through the ground
-    if (this.y + this.height / 2 >= this.floorPosition)
+    if (this.y + this.velocity.y + this.height / 2 >= this.floorPosition)
     {
         this.velocity.y = 0;
         this.y = this.floorPosition - this.height / 2;
@@ -91,48 +92,110 @@ FallingObject.prototype.update = function()
 
 FallingObject.prototype.draw = function(ctx)
 {    
-    ctx.fillRect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height);
+    // ctx.fillRect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height);
+    ctx.drawImage(this.image, this.x - this.width / 2, this.y - this.height / 2);
 };
 
 module.exports = FallingObject;
 
 
 },{}],3:[function(require,module,exports){
-//require FallingObjects faile to draw objects
 const FallingObject = require("./FallingObject.js");
-
-// creating the array
-// let FallingObjectArray = new Array;
-// if true then it is a array 
-//FallingObjectArray.constructor === Array;
+const smallFallingObjectSprites = "/src/assets/art/small-falling-objects.png";
+const powerupsSprites = "/src/assets/art/powerups.png";
 
 function FallingObjectManager()
 {
-
-    //number of objects you want
-    // let num = 10;
-    this.fallingObjectsArray = [];
-
-    // // looping number of objects
-    // for(i = 0; i < num; i++){
-    //     // adding elements to the array
-    //     // random x position 
-    //     FallingObjectArray[i] = new FallingObject(Math.floor(Math.random() * window.innerWidth - 50));
+    this.fallingObjectSprites = [
+        {
+            // Small falling objects
+            image: new Image(),
+            length: 5, // How many different sprites there are in the spritesheet
+            size: [[8, 10], [8, 16], [14, 12], [10, 10], [8, 6]]    // The width/height of the sprites, by a factor of 1/3
+                                                                    // (not including white-space).
+        },
+        {
+            // Powerups
+            image: new Image(),
+            length: 2,
+            size: [[16, 16], [16, 16]]
+        },
+        // {
+        //     image: new Image(),
+        //     length: 2
+        // },
+        // {
+        //     image: new Image(),
+        //     length: 2
+        // }
+    ];
+    //     small: {
+    //         image: new Image(),
+    //         length: 5, // How many different sprites there are in the spritesheet
+    //         size: [[8, 10], [8, 16], [14, 12], [10, 10], [8, 6]]    // The width/height of the sprites
+    //                                                                 // (not including white-space)
+    //     },
+    //     large: {
+    //         image: new Image(),
+    //         length: 2
+    //     },
+    //     powerups: {
+    //         image: new Image(),
+    //         length: 2
+    //     },
+    //     powerdowns: {
+    //         image: new Image(),
+    //         length: 2
+    //     }
     // }
+    this.fallingObjectsArray = [];      // Contains all the visible falling objects in the game
 
+    // Binds
     this.createFallingObject = this.createFallingObject.bind(this);
 
-    this.createFallingObject();
+    // Image sources
+    this.fallingObjectSprites[0].image.src = smallFallingObjectSprites;
+    this.fallingObjectSprites[1].image.src = powerupsSprites;
 
-    this.timer = setInterval(this.createFallingObject, 3000);
+    // Create the initial falling object and begin the timer
 };
+
+FallingObjectManager.prototype.start = function()
+{
+    this.createFallingObject();
+    this.timer = setInterval(this.createFallingObject, 3000);
+}
 
 FallingObjectManager.prototype.createFallingObject = function()
 {
-    let width = 50;
-    let height = 50;
-    let x = Math.random() * window.innerWidth - width;
-    this.fallingObjectsArray.push(new FallingObject(x, width, height));
+    let sprite = this.fallingObjectSprites[Math.floor(Math.random() * this.fallingObjectSprites.length)];
+    let spriteIndex = Math.floor(Math.random() * sprite.length);
+    let width = sprite.size[spriteIndex][0] * 3;
+    let height = sprite.size[spriteIndex][1] * 3;
+    let x = Math.random() * (window.innerWidth - width);
+    let flip = (Math.floor((Math.random() * 2)) === 0) ? true : false;
+
+    let image = document.createElement("canvas").getContext("2d");
+    image.canvas.width = width;
+    image.canvas.height = height;
+    
+    if (flip)
+    {
+        image.scale(-1, 1);             // Flip the image
+        image.translate(-width, 0);     // Offset because of the flip
+    }
+    image.drawImage(
+        sprite.image,
+        spriteIndex * 48 + (48 - width) / 2,
+        (48 - height) / 2,
+        width,
+        height,
+        0,
+        0,
+        width,
+        height
+    );
+    this.fallingObjectsArray.push(new FallingObject(x, width, height, image.canvas));
 }
     
 FallingObjectManager.prototype.update = function()
@@ -149,15 +212,6 @@ FallingObjectManager.prototype.update = function()
         clearInterval(this.timer);
         this.timer = null;
     }
-    //funciton for updating the objects position
-    // function up(i){
-    //     FallingObjectArray[i].update()
-    // }
-
-    // loop for all the objects
-    // for(i = 0; i < FallingObjectArray.length; i++){
-    //     setTimeout(up, i * 2000 + 2000, i); // when i * 2 seconds plus 2 seconds then run gravity
-    // }
 
 };
 
@@ -173,11 +227,34 @@ module.exports = FallingObjectManager;
 
 },{"./FallingObject.js":2}],4:[function(require,module,exports){
 /**
+ * Manages the GUI.
+ */
+function GUI() {}
+
+GUI.prototype.healthValue = 0;
+GUI.prototype.wave = document.getElementById("wave-indicator");
+GUI.prototype.health = document.getElementById("health-bar__bar");
+
+/**
+ * Changes the health of the crops
+ * @param {x} int from 0.0 to 1.0 
+ */
+GUI.prototype.updateHealth = function(x)
+{
+    this.health.style.webkitClipPath = `inset(0 ${100 * x}% 0 0)`;
+    GUI.prototype.healthValue += 0.001;
+}
+
+module.exports = GUI;
+},{}],5:[function(require,module,exports){
+/**
  * Constructor function responsible for running the update method and
  * updating the various objects on screen.
  * 
  * The code here shouldn't be touched.
  */
+
+ const GUI = require("./GUI.js");
 
 function Game(render, player, keyboard, fallingObjectsManager)
 {
@@ -185,6 +262,7 @@ function Game(render, player, keyboard, fallingObjectsManager)
     this.player = player;
     this.keyboard = keyboard;
     this.fallingObjectsManager = fallingObjectsManager;
+    this.gui = new GUI;
     this.loopId = undefined;
     this.camera = undefined;
 }
@@ -199,6 +277,9 @@ Game.prototype.init = function()
     this.render.renderable.push(this.player);
     this.render.renderable.push(this.fallingObjectsManager);
 
+    // Begin falling objects
+    this.fallingObjectsManager.start();
+
     // Begin the update loop
     loopId = setInterval(this.update, 1000 / 50);
 };
@@ -212,7 +293,7 @@ Game.prototype.update = function()
 };
 
 module.exports = Game;
-},{}],5:[function(require,module,exports){
+},{"./GUI.js":4}],6:[function(require,module,exports){
 function Keyboard()
 {
     // These values will be either 0 or 1.
@@ -224,12 +305,12 @@ Keyboard.prototype.down = 0;
 Keyboard.prototype.up = 0;
 
 module.exports = Keyboard;
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 const sprite = "./src/assets/art/player.png";
 
 function Player(keyboard)
 {
-    this.x = 384;           // Start the player at half the game width
+    this.x = 640;           // Start the player at half the game width
     this.y = 720 - 64;
     this.width = 48;        // Should match the sprite width
     this.height = 48;
@@ -347,7 +428,7 @@ Player.prototype.draw = function(ctx)
 };
 
 module.exports = Player;
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 const Camera = require("./Camera.js");
 const mainBackground = "./src/assets/art/main-background.png";
 const interludeBackground = "./src/assets/art/interlude-background.png";
@@ -447,7 +528,7 @@ Render.prototype.resizeGame = function()
 }
 
 module.exports = Render;
-},{"./Camera.js":1}],8:[function(require,module,exports){
+},{"./Camera.js":1}],9:[function(require,module,exports){
 /**
  * The "entry" file where the canvas is created and the different components
  * that make up the game (such as the Game, Render) are instantiated.
@@ -461,13 +542,11 @@ const Player = require("./Player.js");
 const Keyboard = require("./Keyboard.js");
 const FallingObjectManager = require("./FallingObjectManager.js")
 
-// Create the canvas
-const canvas = document.createElement("canvas");
-const ctx = canvas.getContext("2d");
-
 window.addEventListener("load", () => {
 
-    document.getElementsByClassName("game")[0].appendChild(canvas);
+    // Retrieve the canvas
+    const canvas = document.querySelector("canvas");
+    const ctx = canvas.getContext("2d");
 
     // Instantiate the game components
     const keyboard = new Keyboard();
@@ -525,9 +604,10 @@ window.addEventListener("load", () => {
     // When the play button is pressed
     document.getElementById("menu__play-btn").addEventListener("click", () => {
         document.getElementsByClassName("game__menu")[0].style["display"] = "none";
+        document.getElementsByClassName("game__ui")[0].style["display"] = "flex";
         document.querySelector("canvas").style["display"] = "block";
         game.init();
     });
 
 });
-},{"./FallingObjectManager.js":3,"./Game.js":4,"./Keyboard.js":5,"./Player.js":6,"./Render.js":7}]},{},[8]);
+},{"./FallingObjectManager.js":3,"./Game.js":5,"./Keyboard.js":6,"./Player.js":7,"./Render.js":8}]},{},[9]);
