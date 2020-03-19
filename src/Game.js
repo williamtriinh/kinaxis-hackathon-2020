@@ -9,6 +9,8 @@ const Keyboard = require("./Keyboard.js");
 
 let key = new Keyboard();
 
+ const GUI = require("./GUI.js");
+
 function Game(render, player, keyboard, fallingObjectsManager)
 {
     this.render = render;
@@ -17,6 +19,7 @@ function Game(render, player, keyboard, fallingObjectsManager)
     this.fallingObjectsManager = fallingObjectsManager;
     this.basket = new Basket(player, keyboard);
     this.camera = this.render.camera;
+    this.gui = new GUI;
     this.loopId = undefined;
 }
 
@@ -29,6 +32,9 @@ Game.prototype.init = function()
     this.render.renderable.push(this.fallingObjectsManager);
     this.render.renderable.push(this.basket);
     this.render.renderable.push(this.player);
+
+    // Begin falling objects
+    this.fallingObjectsManager.start();
 
     // Begin the update loop
     loopId = setInterval(this.update, 1000 / 50);

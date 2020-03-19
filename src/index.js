@@ -11,13 +11,11 @@ const Player = require("./Player.js");
 const Keyboard = require("./Keyboard.js");
 const FallingObjectManager = require("./FallingObjectManager.js")
 
-// Create the canvas
-const canvas = document.createElement("canvas");
-const ctx = canvas.getContext("2d");
-
 window.addEventListener("load", () => {
 
-    document.getElementsByClassName("game")[0].appendChild(canvas);
+    // Retrieve the canvas
+    const canvas = document.querySelector("canvas");
+    const ctx = canvas.getContext("2d");
 
     // Instantiate the game components
     const keyboard = new Keyboard();
@@ -84,6 +82,7 @@ window.addEventListener("load", () => {
     // When the play button is pressed
     document.getElementById("menu__play-btn").addEventListener("click", () => {
         document.getElementsByClassName("game__menu")[0].style["display"] = "none";
+        document.getElementsByClassName("game__ui")[0].style["display"] = "flex";
         document.querySelector("canvas").style["display"] = "block";
         game.init();
     });
