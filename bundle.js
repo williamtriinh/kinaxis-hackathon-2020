@@ -1,5 +1,8 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+const GUI = require("./GUI.js");
 const basketsSprite = "/src/assets/art/baskets.png";
+
+const gui = new GUI();
 
 function Basket(player, keyboard) {
 
@@ -13,7 +16,8 @@ function Basket(player, keyboard) {
     Basket.prototype.isNearby = false;          // Whether the player is near the container.
     Basket.prototype.sprite = {
         image: new Image(),
-        index: 0                    // Which basket we're using
+        index: 0,   // Which basket we're using
+        length: 3   // How many sprites there are
     }
     
     this.sprite.image.src = basketsSprite;
@@ -27,9 +31,24 @@ Basket.prototype.update = function () {
     if (this.keyboard.use === 1)
     {
         // checking position of this.x to see if in range and this.y to see if I can pick up the basket
-        if (this.player.x > this.x - this.width && this.player.x < this.x + this.width) {
+        if (this.player.x > this.x - this.width && this.player.x < this.x + this.width)
+        {
             Basket.prototype.isCarried = !this.isCarried;
         }
+    }
+
+    if (this.keyboard.scrollLeft === 1)
+    {
+        this.sprite.index--;
+        if (this.sprite.index < 0)
+        {
+            this.sprite.index = this.sprite.length - 1;
+        }
+    }
+
+    if (this.keyboard.scrollRight === 1)
+    {
+        this.sprite.index = (this.sprite.index + 1) % 3;
     }
 
     if (this.isCarried)
@@ -49,14 +68,10 @@ Basket.prototype.update = function () {
 
 Basket.prototype.draw = function (ctx) {
 
-    ctx.font = "20px Arial";
-
     // Display the ui indicator
-    if (this.player.x > this.x - this.width && this.player.x < this.x + this.width) {
-        if (!this.isNearby)
-        {
-            // 
-        }
+    if (this.player.x > this.x - this.width && this.player.x < this.x + this.width && !this.isCarried)
+    {
+        gui.drawText(ctx, "PRESS 'E' TO BEGIN WAVE!", this.x, this.y - this.height);
     }
 
     // ctx.fillRect(this.x, this.y, this.width, this.height);
@@ -74,7 +89,7 @@ Basket.prototype.draw = function (ctx) {
 }
 
 module.exports = Basket;
-},{}],2:[function(require,module,exports){
+},{"./GUI.js":5}],2:[function(require,module,exports){
 /** 
  * Handles all camera related actions
  * 
@@ -308,8 +323,10 @@ module.exports = FallingObjectManager;
 function GUI() {}
 
 GUI.prototype.healthValue = 0;
+GUI.prototype.canvas = document.getElementsByClassName("game__ui")[0];      // The <div> element for adding gui guiElements to.
 GUI.prototype.wave = document.getElementById("wave-indicator");
 GUI.prototype.health = document.getElementById("health-bar__bar");
+GUI.prototype.guiElements = {};
 
 /**
  * Changes the health of the crops
@@ -322,6 +339,16 @@ GUI.prototype.updateHealth = function(x)
     GUI.prototype.healthValue += 0.001;
 }
 
+GUI.prototype.drawText = function(ctx, text, x, y)
+{
+    ctx.font = "32px MatchupPro";
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#272736"
+    ctx.fillText(text, x + 3, y + 3);
+    ctx.fillStyle = "white";
+    ctx.fillText(text, x, y);
+}
+
 module.exports = GUI;
 },{}],6:[function(require,module,exports){
 /**
@@ -332,10 +359,7 @@ module.exports = GUI;
  */
 const Basket = require("./Basket.js");
 const Keyboard = require("./Keyboard.js");
-
-let key = new Keyboard();
-
- const GUI = require("./GUI.js");
+const GUI = require("./GUI.js");
 
 function Game(render, player, keyboard, fallingObjectsManager)
 {
@@ -373,7 +397,7 @@ Game.prototype.update = function()
     this.basket.update();
     this.player.update();
 
-    Keyboard.prototype.use = 0;
+    this.keyboard.reset();
 
     this.render.draw();
 };
@@ -389,10 +413,14 @@ Keyboard.prototype.left = 0;
 Keyboard.prototype.right = 0;
 Keyboard.prototype.down = 0;
 Keyboard.prototype.up = 0;
-Keyboard.prototype.use = 0;
+Keyboard.prototype.use = 0
+Keyboard.prototype.scrollLeft = 0;
+Keyboard.prototype.scrollRight = 0;
 
 Keyboard.prototype.reset = function() {
-    this.use = 0;
+    Keyboard.prototype.use = 0;
+    Keyboard.prototype.scrollLeft = 0;
+    Keyboard.prototype.scrollRight = 0;
 }
 
 module.exports = Keyboard;
@@ -652,6 +680,12 @@ window.addEventListener("load", () => {
             case "KeyE":
                 Keyboard.prototype.use = 1;
                 break;
+            case "KeyJ":
+                Keyboard.prototype.scrollLeft = 1;
+                break;
+            case "KeyL":
+                Keyboard.prototype.scrollRight = 1;
+                break;
         }
     });
 
@@ -704,7 +738,7 @@ window.addEventListener("load", () => {
     // When the play button is pressed
     document.getElementById("menu__play-btn").addEventListener("click", () => {
         document.getElementsByClassName("game__menu")[0].style["display"] = "none";
-        document.getElementsByClassName("game__ui")[0].style["display"] = "flex";
+        document.getElementsByClassName("game__ui__wrapper")[0].style["display"] = "flex";
         document.querySelector("canvas").style["display"] = "block";
         game.init();
     });

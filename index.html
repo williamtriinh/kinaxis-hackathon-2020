@@ -62,19 +62,14 @@
                 color: #c2c2d1;
             }
 
-            .in-game-text {
+            .text {
                 color: white;
                 text-shadow: 2px 2px #272736;
             }
 
-            .text {
-                color: white;
-                text-shadow: 2px 2px black;
-            }
-
             .text2 {
                 color: white;
-                text-shadow: 2px 2px black;
+                text-shadow: 2px 2px #272736;
             }
 
             @media (orientation: landscape)
@@ -88,10 +83,6 @@
                 }
 
                 .link {
-                    font-size: 3vh;
-                }
-
-                .in-game-text {
                     font-size: 3vh;
                 }
 
@@ -116,10 +107,6 @@
 
                 .link {
                     font-size: 2vw;
-                }
-
-                .in-game-text {
-                    font-size: 1vw;
                 }
 
                 .text {
@@ -161,15 +148,22 @@
             }
 
             /* In game user interface */
-            .game__ui {
+            .game__ui__wrapper {
+                display: none;
+                flex-direction: column;
                 cursor: default;
                 position: absolute;
-                display: none;
+                width: 100%;
+                height: 100%;
+            }
+
+            .game__ui {
+                display: flex;
+                position: relative;
+                flex: 1;
                 flex-direction: column;
                 align-items: center;
                 background-color: transparent;
-                width: 100%;
-                height: 100%;
             }
 
             .game__ui__health-bar {
@@ -217,15 +211,17 @@
                     <a href="https://github.com/williamtriinh/kinaxis-hackathon-2020" bla class="link">Github</a>
                 </div>
             </div>
-            <div class="game__ui">
-                <p class="text" id="wave-indicator">Wave 1</p>
-                <div style="flex: 1;"></div>
-                <p class="text2" style="color: white">Crop quality: 100%</p>
-                <!-- <div class="game__ui__health-bar"></div> -->
-                <div class="game__ui__health-bar__wrapper">
-                    <img id="health-bar__frame" src="/src/assets/art/health-bar0.png">
-                    <img id="health-bar__bar" src="/src/assets/art/health-bar1.png">
-                    <!-- <div class="health-bar__frame"></div> -->
+            <div class="game__ui__wrapper">
+                <div class="game__ui">
+                    <p class="text" id="wave-indicator">Wave 1</p>
+                    <div style="flex: 1;"></div>
+                    <p class="text2" style="color: white">Crop quality: 100%</p>
+                    <!-- <div class="game__ui__health-bar"></div> -->
+                    <div class="game__ui__health-bar__wrapper">
+                        <img id="health-bar__frame" src="/src/assets/art/health-bar0.png">
+                        <img id="health-bar__bar" src="/src/assets/art/health-bar1.png">
+                        <!-- <div class="health-bar__frame"></div> -->
+                    </div>
                 </div>
             </div>
             <canvas></canvas>

@@ -30,6 +30,12 @@ window.addEventListener("load", () => {
             case "KeyE":
                 Keyboard.prototype.use = 1;
                 break;
+            case "KeyJ":
+                Keyboard.prototype.scrollLeft = 1;
+                break;
+            case "KeyL":
+                Keyboard.prototype.scrollRight = 1;
+                break;
         }
     });
 
@@ -82,7 +88,7 @@ window.addEventListener("load", () => {
     // When the play button is pressed
     document.getElementById("menu__play-btn").addEventListener("click", () => {
         document.getElementsByClassName("game__menu")[0].style["display"] = "none";
-        document.getElementsByClassName("game__ui")[0].style["display"] = "flex";
+        document.getElementsByClassName("game__ui__wrapper")[0].style["display"] = "flex";
         document.querySelector("canvas").style["display"] = "block";
         game.init();
     });

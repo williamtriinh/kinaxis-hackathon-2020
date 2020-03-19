@@ -6,10 +6,7 @@
  */
 const Basket = require("./Basket.js");
 const Keyboard = require("./Keyboard.js");
-
-let key = new Keyboard();
-
- const GUI = require("./GUI.js");
+const GUI = require("./GUI.js");
 
 function Game(render, player, keyboard, fallingObjectsManager)
 {
@@ -47,7 +44,7 @@ Game.prototype.update = function()
     this.basket.update();
     this.player.update();
 
-    Keyboard.prototype.use = 0;
+    this.keyboard.reset();
 
     this.render.draw();
 };
