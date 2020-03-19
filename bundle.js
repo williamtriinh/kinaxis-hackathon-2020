@@ -1,4 +1,51 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+function Basket(player) {
+    this.x = window.innerWidth - 200;
+    this.y = 586;
+    this.floor = 586;
+    this.height = 70;
+    this.width = 20;
+    this.player = player
+}
+
+Basket.prototype.update = function () {
+
+    window.addEventListener("keyup", (e) => {
+
+        if (this.player.x > this.x - 200 && this.player.x < this.x + 200 
+            && e.keyCode == 69 && this.y == this.floor) {
+            this.y = this.player.y - this.player.height*2;
+
+        }
+
+        else if(this.y != this.floor && e.keyCode == 69){
+            console.log('reverse')
+            this.y = this.floor
+        }
+       
+    }
+    )
+    
+    if(this.y != this.floor){
+        this.x = this.player.x;
+        this.y = this.player.y - this.player.height*2;
+    }
+    
+}
+
+
+Basket.prototype.draw = function (ctx) {
+            ctx.font = "20px Arial";
+
+            if (this.player.x > this.x - 100 && this.player.x < this.x + 100 && this.y == this.floor) {
+                ctx.fillText("Press e to Pick Up", this.x, 540);
+            }
+
+            ctx.fillRect(this.x, this.y, this.width, this.height);
+        }
+
+module.exports = Basket;
+},{}],2:[function(require,module,exports){
 /** 
  * Handles all camera related actions
  * 
@@ -53,7 +100,7 @@ Camera.prototype.update = function()
 
 module.exports = Camera;
 
-},{}],2:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 function FallingObject(x, width, height)
 {
     // parameter x will be random
@@ -97,7 +144,7 @@ FallingObject.prototype.draw = function(ctx)
 module.exports = FallingObject;
 
 
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 //require FallingObjects faile to draw objects
 const FallingObject = require("./FallingObject.js");
 
@@ -171,7 +218,7 @@ FallingObjectManager.prototype.draw = function(ctx){
 }
 module.exports = FallingObjectManager;  
 
-},{"./FallingObject.js":2}],4:[function(require,module,exports){
+},{"./FallingObject.js":3}],5:[function(require,module,exports){
 /**
  * Constructor function responsible for running the update method and
  * updating the various objects on screen.
@@ -179,12 +226,13 @@ module.exports = FallingObjectManager;
  * The code here shouldn't be touched.
  */
 
-function Game(render, player, keyboard, fallingObjectsManager)
+function Game(render, player, keyboard, fallingObjectsManager, basket)
 {
     this.render = render;
     this.player = player;
     this.keyboard = keyboard;
     this.fallingObjectsManager = fallingObjectsManager;
+    this.basket = basket;
     this.loopId = undefined;
     this.camera = undefined;
 }
@@ -196,8 +244,9 @@ Game.prototype.init = function()
     this.camera = this.render.camera;
     this.camera.attach(this.player);
 
-    this.render.renderable.push(this.player);
     this.render.renderable.push(this.fallingObjectsManager);
+    this.render.renderable.push(this.basket);
+    this.render.renderable.push(this.player);
 
     // Begin the update loop
     loopId = setInterval(this.update, 1000 / 50);
@@ -205,14 +254,15 @@ Game.prototype.init = function()
 
 Game.prototype.update = function()
 {
-    this.player.update();
     this.camera.update();
     this.fallingObjectsManager.update();
+    this.basket.update();
+    this.player.update();
     this.render.draw();
 };
 
 module.exports = Game;
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 function Keyboard()
 {
     // These values will be either 0 or 1.
@@ -224,7 +274,7 @@ Keyboard.prototype.down = 0;
 Keyboard.prototype.up = 0;
 
 module.exports = Keyboard;
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 const sprite = "./src/assets/art/player.png";
 
 function Player(keyboard)
@@ -347,7 +397,7 @@ Player.prototype.draw = function(ctx)
 };
 
 module.exports = Player;
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 const Camera = require("./Camera.js");
 const mainBackground = "./src/assets/art/main-background.png";
 const interludeBackground = "./src/assets/art/interlude-background.png";
@@ -447,7 +497,7 @@ Render.prototype.resizeGame = function()
 }
 
 module.exports = Render;
-},{"./Camera.js":1}],8:[function(require,module,exports){
+},{"./Camera.js":2}],9:[function(require,module,exports){
 /**
  * The "entry" file where the canvas is created and the different components
  * that make up the game (such as the Game, Render) are instantiated.
@@ -459,6 +509,7 @@ const Game = require("./Game.js");
 const Render = require("./Render.js");
 const Player = require("./Player.js");
 const Keyboard = require("./Keyboard.js");
+const Basket = require("./Basket.js");
 const FallingObjectManager = require("./FallingObjectManager.js")
 
 // Create the canvas
@@ -473,8 +524,9 @@ window.addEventListener("load", () => {
     const keyboard = new Keyboard();
     const player = new Player(keyboard);
     const render = new Render(canvas, ctx);
+    const basket = new Basket(player);
     const fallingObjectsManager = new FallingObjectManager();
-    const game = new Game(render, player, keyboard, fallingObjectsManager);
+    const game = new Game(render, player, keyboard, fallingObjectsManager, basket);
 
     window.addEventListener("keydown", (ev) => {
         switch (ev.code) {
@@ -530,4 +582,4 @@ window.addEventListener("load", () => {
     });
 
 });
-},{"./FallingObjectManager.js":3,"./Game.js":4,"./Keyboard.js":5,"./Player.js":6,"./Render.js":7}]},{},[8]);
+},{"./Basket.js":1,"./FallingObjectManager.js":4,"./Game.js":5,"./Keyboard.js":6,"./Player.js":7,"./Render.js":8}]},{},[9]);
