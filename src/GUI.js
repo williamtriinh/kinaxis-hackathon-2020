@@ -2,6 +2,7 @@
  * Manages the GUI.
  */
 
+const { gameController } = require("./GameController");
 const healthBarFrameSprite = "/src/assets/art/health-bar0.png";
 const healthBarSprite = "/src/assets/art/health-bar1.png";
 
@@ -26,11 +27,11 @@ function GUI() {
     this.drawText = this.drawText.bind(this);
 }
 
-GUI.prototype.cropQuality = 1;
+// GUI.prototype.cropQuality = 1;
 GUI.prototype.canvas = document.getElementsByClassName("game__ui")[0];      // The <div> element for adding gui guiElements to.
-GUI.prototype.wave = document.getElementById("wave-indicator");
-GUI.prototype.health = document.getElementById("health-bar__bar");
-GUI.prototype.guiElements = {};
+// Old code
+// GUI.prototype.wave = document.getElementById("wave-indicator");
+// GUI.prototype.health = document.getElementById("health-bar__bar");
 
 GUI.prototype.draw = function(ctx)
 {
@@ -56,12 +57,12 @@ GUI.prototype.draw = function(ctx)
         this.sprite.healthBar.height,
         640 - this.sprite.healthBar.width / 2,
         700 - this.sprite.healthBar.height / 2,
-        this.sprite.healthBar.width * this.cropQuality, // Modify this property to change health bar length
+        this.sprite.healthBar.width * gameController.cropQuality, // Modify this property to change health bar length
         this.sprite.healthBar.height
     )
 
     // Crop quality
-    this.drawText(ctx, `CROP QUALITY: ${this.cropQuality * 100}%`, 640, 680);
+    this.drawText(ctx, `CROP QUALITY: ${gameController.cropQuality * 100}%`, 640, 680);
 }
 
 /**

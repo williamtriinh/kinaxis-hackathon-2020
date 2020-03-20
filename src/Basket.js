@@ -1,15 +1,17 @@
 const GUI = require("./GUI.js");
+const Keyboard = require("./Keyboard");
 const basketsSprite = "/src/assets/art/baskets.png";
 
 const gui = new GUI();
+const keyboard = new Keyboard();
 
-function Basket(player, keyboard) {
+function Basket() {
 
-    this.x = 640;
-    this.y = 720 - 24;
-    this.height = 48;
-    this.width = 48;
-    this.floor = 720 - 64 - this.height / 2;
+    Basket.prototype.x = 640;
+    Basket.prototype.y = 720 - 24;
+    Basket.prototype.height = 48;
+    Basket.prototype.width = 48;
+    Basket.prototype.floor = 720 - 64 - this.height / 2;
 
     Basket.prototype.isCarried = false;
     Basket.prototype.isNearby = false;          // Whether the player is near the container.
@@ -21,13 +23,18 @@ function Basket(player, keyboard) {
     
     this.sprite.image.src = basketsSprite;
 
-    this.player = player;
-    this.keyboard = keyboard;
+    Basket.prototype.player = undefined;
+}
+
+// Add player to this basket instance
+Basket.prototype.attach = function(player)
+{
+    Basket.prototype.player = player;
 }
 
 Basket.prototype.update = function () {
 
-    if (this.keyboard.use === 1)
+    if (keyboard.use === 1)
     {
         // checking position of this.x to see if in range and this.y to see if I can pick up the basket
         if (this.player.x > this.x - this.width && this.player.x < this.x + this.width)
@@ -36,7 +43,7 @@ Basket.prototype.update = function () {
         }
     }
 
-    if (this.keyboard.scrollLeft === 1)
+    if (keyboard.scrollLeft === 1)
     {
         this.sprite.index--;
         if (this.sprite.index < 0)
@@ -45,7 +52,7 @@ Basket.prototype.update = function () {
         }
     }
 
-    if (this.keyboard.scrollRight === 1)
+    if (keyboard.scrollRight === 1)
     {
         this.sprite.index = (this.sprite.index + 1) % 3;
     }
@@ -53,13 +60,13 @@ Basket.prototype.update = function () {
     if (this.isCarried)
     {
         // Follow the player
-        this.x = this.player.x;
-        this.y = this.player.y - this.player.height;
+        Basket.prototype.x = this.player.x;
+        Basket.prototype.y = this.player.y - this.player.height;
     }
     else
     {
         // Stay on the ground
-        this.y = this.floor;
+        Basket.prototype.y = this.floor;
     }
     
 }

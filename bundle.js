@@ -1,16 +1,18 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 const GUI = require("./GUI.js");
+const Keyboard = require("./Keyboard");
 const basketsSprite = "/src/assets/art/baskets.png";
 
 const gui = new GUI();
+const keyboard = new Keyboard();
 
-function Basket(player, keyboard) {
+function Basket() {
 
-    this.x = 640;
-    this.y = 720 - 24;
-    this.height = 48;
-    this.width = 48;
-    this.floor = 720 - 64 - this.height / 2;
+    Basket.prototype.x = 640;
+    Basket.prototype.y = 720 - 24;
+    Basket.prototype.height = 48;
+    Basket.prototype.width = 48;
+    Basket.prototype.floor = 720 - 64 - this.height / 2;
 
     Basket.prototype.isCarried = false;
     Basket.prototype.isNearby = false;          // Whether the player is near the container.
@@ -22,13 +24,18 @@ function Basket(player, keyboard) {
     
     this.sprite.image.src = basketsSprite;
 
-    this.player = player;
-    this.keyboard = keyboard;
+    Basket.prototype.player = undefined;
+}
+
+// Add player to this basket instance
+Basket.prototype.attach = function(player)
+{
+    Basket.prototype.player = player;
 }
 
 Basket.prototype.update = function () {
 
-    if (this.keyboard.use === 1)
+    if (keyboard.use === 1)
     {
         // checking position of this.x to see if in range and this.y to see if I can pick up the basket
         if (this.player.x > this.x - this.width && this.player.x < this.x + this.width)
@@ -37,7 +44,7 @@ Basket.prototype.update = function () {
         }
     }
 
-    if (this.keyboard.scrollLeft === 1)
+    if (keyboard.scrollLeft === 1)
     {
         this.sprite.index--;
         if (this.sprite.index < 0)
@@ -46,7 +53,7 @@ Basket.prototype.update = function () {
         }
     }
 
-    if (this.keyboard.scrollRight === 1)
+    if (keyboard.scrollRight === 1)
     {
         this.sprite.index = (this.sprite.index + 1) % 3;
     }
@@ -54,13 +61,13 @@ Basket.prototype.update = function () {
     if (this.isCarried)
     {
         // Follow the player
-        this.x = this.player.x;
-        this.y = this.player.y - this.player.height;
+        Basket.prototype.x = this.player.x;
+        Basket.prototype.y = this.player.y - this.player.height;
     }
     else
     {
         // Stay on the ground
-        this.y = this.floor;
+        Basket.prototype.y = this.floor;
     }
     
 }
@@ -89,7 +96,7 @@ Basket.prototype.draw = function (ctx) {
 }
 
 module.exports = Basket;
-},{"./GUI.js":5}],2:[function(require,module,exports){
+},{"./GUI.js":5,"./Keyboard":8}],2:[function(require,module,exports){
 /** 
  * Handles all camera related actions
  * 
@@ -145,9 +152,14 @@ Camera.prototype.update = function()
 module.exports = Camera;
 
 },{}],3:[function(require,module,exports){
-function FallingObject(x, width, height, image)
+const Basket = require("./Basket");
+
+const basket = new Basket();
+
+function FallingObject(id, x, width, height, image)
 {
     // parameter x will be random
+    this.id = id;
     this.x = x;
     this.y = -height;
     this.width = width;
@@ -161,9 +173,26 @@ function FallingObject(x, width, height, image)
     }
 
     //low gravity
-    this.gravity = .03;
-    this.floorPosition = 720 - 64;
+    FallingObject.prototype.gravity = .03;
+    FallingObject.prototype.floorPosition = 720 - 64;
+
+    FallingObject.prototype.missedFallingObject = undefined;
+    FallingObject.prototype.caughtFallingObject = undefined;
+
+    this.addCallbacks = this.addCallbacks.bind(this);
 };
+
+/**
+ * Adds the callback methods for missed/caught objects to the prototype. This method is only called once.
+ * The FallingObjectManager supplies the methods
+ */
+FallingObject.prototype.addCallbacks = function(_missedFallingObject, _caughtFallingObject)
+{
+    FallingObject.prototype.missedFallingObject = _missedFallingObject;
+    FallingObject.prototype.caughtFallingObject = _caughtFallingObject;
+    this.missedFallingObject = this.missedFallingObject.bind(this);
+    this.caughtFallingObject = this.caughtFallingObject.bind(this);
+}
 
 FallingObject.prototype.update = function()
 {
@@ -173,8 +202,19 @@ FallingObject.prototype.update = function()
     // Make sure the objects don't fall through the ground
     if (this.y + this.velocity.y + this.height / 2 >= this.floorPosition)
     {
+        this.missedFallingObject(this.id);
         this.velocity.y = 0;
         this.y = this.floorPosition - this.height / 2;
+    }
+
+    // When the objects are caught by the basket
+    // Only allow objects to be caught when colliding with the top of the basket.
+    if (this.y + this.velocity.y + this.height / 2 >= basket.y &&
+        this.y + this.velocity.y + this.height / 2 <= basket.y + 10 &&
+        this.x >= basket.x - basket.width / 2 &&
+        this.x <= basket.x + basket.width / 2)
+    {
+        this.caughtFallingObject(this.id);
     }
 
     this.x += this.velocity.x;
@@ -190,14 +230,15 @@ FallingObject.prototype.draw = function(ctx)
 module.exports = FallingObject;
 
 
-},{}],4:[function(require,module,exports){
+},{"./Basket":1}],4:[function(require,module,exports){
+const { gameController } = require("./GameController");
 const FallingObject = require("./FallingObject.js");
 const smallFallingObjectSprites = "/src/assets/art/small-falling-objects.png";
 const powerupsSprites = "/src/assets/art/powerups.png";
 
 function FallingObjectManager()
 {
-    this.fallingObjectSprites = [
+    FallingObjectManager.prototype.fallingObjectSprites = [
         {
             // Small falling objects
             image: new Image(),
@@ -239,9 +280,11 @@ function FallingObjectManager()
     //         length: 2
     //     }
     // }
-    this.fallingObjectsArray = [];      // Contains all the visible falling objects in the game
+    FallingObjectManager.prototype.fallingObjectsArray = {};      // Contains all the visible falling objects in the game
 
     // Binds
+    this.missedFallingObject = this.missedFallingObject.bind(this);
+    this.caughtFallingObject = this.caughtFallingObject.bind(this);
     this.createFallingObject = this.createFallingObject.bind(this);
 
     // Image sources
@@ -254,17 +297,45 @@ function FallingObjectManager()
 FallingObjectManager.prototype.start = function()
 {
     this.createFallingObject();
-    this.timer = setInterval(this.createFallingObject, 3000);
+    setTimeout(this.createFallingObject, Math.random() * (5000 - 4000) + 4000);
 }
 
+/**
+ * Removes a falling object by its id
+ * @param {id} String The id of the falling object
+ */
+FallingObjectManager.prototype.missedFallingObject = function(id)
+{
+    delete this.fallingObjectsArray[id];
+    gameController.cropQuality = Math.floor(gameController.cropQuality * 100 - 1) / 100;
+    if (gameController.cropQuality <= 0)
+    {
+        gameController.cropQuality = 0;
+    }
+    gameController.wave.collected.missed++;
+}
+
+/**
+ * When the object was successfully caught
+ */
+FallingObjectManager.prototype.caughtFallingObject = function(id)
+{
+    delete this.fallingObjectsArray[id];
+    gameController.wave.collected.total++;
+}
+
+// Method for creating the falling objects
 FallingObjectManager.prototype.createFallingObject = function()
 {
-    let sprite = this.fallingObjectSprites[Math.floor(Math.random() * this.fallingObjectSprites.length)];
+    let bePowerup = (Math.floor(Math.random() * 15) === 0 ? true : false); // 1/15 chance of being a powerup
+    let sprite = this.fallingObjectSprites[bePowerup ? 1 : 0];
     let spriteIndex = Math.floor(Math.random() * sprite.length);
     let width = sprite.size[spriteIndex][0] * 3;
     let height = sprite.size[spriteIndex][1] * 3;
-    let x = Math.random() * (window.innerWidth - width);
+    let x = Math.random() * (1280 - width);
     let flip = (Math.floor((Math.random() * 2)) === 0) ? true : false;
+
+    let id = Date.now();
 
     let image = document.createElement("canvas").getContext("2d");
     image.canvas.width = width;
@@ -286,15 +357,30 @@ FallingObjectManager.prototype.createFallingObject = function()
         width,
         height
     );
-    this.fallingObjectsArray.push(new FallingObject(x, width, height, image.canvas));
+
+    let obj = new FallingObject(`${id}`, x, width, height, image.canvas)
+    // Add the destroy/caught method to the prototype
+    if (obj.destroy === undefined || obj.caughtFallingObject)
+    {
+        obj.addCallbacks(this.missedFallingObject, this.caughtFallingObject);
+    }
+
+    this.fallingObjectsArray[`${id}`] = obj;
+
+    if (Object.keys(this.fallingObjectsArray).length <= 10)
+        setTimeout(this.createFallingObject, Math.random() * (5000 - 4000) + 4000);
 }
     
 FallingObjectManager.prototype.update = function()
 {
     // Update the falling objects
-    for (let i = 0; i < this.fallingObjectsArray.length; i++)
+    // for (let i = 0; i < this.fallingObjectsArray.length; i++)
+    // {
+    //     this.fallingObjectsArray[i].update();
+    // }
+    for (let i in this.fallingObjectsArray)
     {
-        this.fallingObjectsArray[i].update();
+        this.fallingObjectsArray[i].update(this.removeFallingObject);
     }
 
     // Stop spawning
@@ -309,18 +395,23 @@ FallingObjectManager.prototype.update = function()
 FallingObjectManager.prototype.draw = function(ctx){
 
     // draw all the objects
-    for(i = 0; i < this.fallingObjectsArray.length; i++){
-        this.fallingObjectsArray[i].draw(ctx)        
+    // for(i = 0; i < this.fallingObjectsArray.length; i++){
+    //     this.fallingObjectsArray[i].draw(ctx)        
+    // }
+    for (let i in this.fallingObjectsArray)
+    {
+        this.fallingObjectsArray[i].draw(ctx);
     }
     
 }
-module.exports = FallingObjectManager;  
 
-},{"./FallingObject.js":3}],5:[function(require,module,exports){
+module.exports = FallingObjectManager;
+},{"./FallingObject.js":3,"./GameController":7}],5:[function(require,module,exports){
 /**
  * Manages the GUI.
  */
 
+const { gameController } = require("./GameController");
 const healthBarFrameSprite = "/src/assets/art/health-bar0.png";
 const healthBarSprite = "/src/assets/art/health-bar1.png";
 
@@ -345,11 +436,11 @@ function GUI() {
     this.drawText = this.drawText.bind(this);
 }
 
-GUI.prototype.cropQuality = 1;
+// GUI.prototype.cropQuality = 1;
 GUI.prototype.canvas = document.getElementsByClassName("game__ui")[0];      // The <div> element for adding gui guiElements to.
-GUI.prototype.wave = document.getElementById("wave-indicator");
-GUI.prototype.health = document.getElementById("health-bar__bar");
-GUI.prototype.guiElements = {};
+// Old code
+// GUI.prototype.wave = document.getElementById("wave-indicator");
+// GUI.prototype.health = document.getElementById("health-bar__bar");
 
 GUI.prototype.draw = function(ctx)
 {
@@ -375,12 +466,12 @@ GUI.prototype.draw = function(ctx)
         this.sprite.healthBar.height,
         640 - this.sprite.healthBar.width / 2,
         700 - this.sprite.healthBar.height / 2,
-        this.sprite.healthBar.width * this.cropQuality, // Modify this property to change health bar length
+        this.sprite.healthBar.width * gameController.cropQuality, // Modify this property to change health bar length
         this.sprite.healthBar.height
     )
 
     // Crop quality
-    this.drawText(ctx, `CROP QUALITY: ${this.cropQuality * 100}%`, 640, 680);
+    this.drawText(ctx, `CROP QUALITY: ${gameController.cropQuality * 100}%`, 640, 680);
 }
 
 /**
@@ -403,7 +494,7 @@ GUI.prototype.drawText = function(ctx, text, x, y)
 }
 
 module.exports = GUI;
-},{}],6:[function(require,module,exports){
+},{"./GameController":7}],6:[function(require,module,exports){
 /**
  * Constructor function responsible for running the update method and
  * updating the various objects on screen.
@@ -420,7 +511,7 @@ function Game(render, player, keyboard, fallingObjectsManager)
     this.player = player;
     this.keyboard = keyboard;
     this.fallingObjectsManager = fallingObjectsManager;
-    this.basket = new Basket(player, keyboard);
+    this.basket = new Basket();
     this.camera = this.render.camera;
     this.gui = new GUI;
     this.loopId = undefined;
@@ -431,6 +522,7 @@ Game.prototype.init = function()
     this.update = this.update.bind(this);
 
     this.camera.attach(this.player);
+    this.basket.attach(this.player);
 
     this.render.renderable.push(this.fallingObjectsManager);
     this.render.renderable.push(this.basket);
@@ -456,7 +548,23 @@ Game.prototype.update = function()
 };
 
 module.exports = Game;
-},{"./Basket.js":1,"./GUI.js":5,"./Keyboard.js":7}],7:[function(require,module,exports){
+},{"./Basket.js":1,"./GUI.js":5,"./Keyboard.js":8}],7:[function(require,module,exports){
+/**
+ * Handles the game stats such as money, crop quality, wave, etc and manages the flow of the game.
+ */
+
+exports.gameController = {
+    cropQuality: 1,
+    money: 0,
+    wave: {
+        number: 1,                  // Wave number
+        collected: {
+            total: 0,               // Total objects collected
+            missed: 0,              // Objects that were not caught
+        },
+    }
+}
+},{}],8:[function(require,module,exports){
 function Keyboard()
 {
     // These values will be either 0 or 1.
@@ -477,7 +585,7 @@ Keyboard.prototype.reset = function() {
 }
 
 module.exports = Keyboard;
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 const sprite = "./src/assets/art/player.png";
 
 function Player(keyboard)
@@ -560,6 +668,13 @@ Player.prototype.update = function()
         this.y = this.floorPosition - this.height / 2;
     }
 
+    // Prevent the player from moving to the right of the screen
+    if (this.x + this.velocity.x >= 1280)
+    {
+        this.x = 1280;
+        this.velocity.x = 0;
+    }
+
     // Update the player's position
     this.x += this.velocity.x;
     this.y += this.velocity.y;
@@ -600,7 +715,7 @@ Player.prototype.draw = function(ctx)
 };
 
 module.exports = Player;
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 const Camera = require("./Camera.js");
 const GUI = require("./GUI.js");
 const mainBackground = "./src/assets/art/main-background.png";
@@ -704,7 +819,7 @@ Render.prototype.resizeGame = function()
 }
 
 module.exports = Render;
-},{"./Camera.js":2,"./GUI.js":5}],10:[function(require,module,exports){
+},{"./Camera.js":2,"./GUI.js":5}],11:[function(require,module,exports){
 /**
  * The "entry" file where the canvas is created and the different components
  * that make up the game (such as the Game, Render) are instantiated.
@@ -801,4 +916,4 @@ window.addEventListener("load", () => {
     });
 
 });
-},{"./FallingObjectManager.js":4,"./Game.js":6,"./Keyboard.js":7,"./Player.js":8,"./Render.js":9}]},{},[10]);
+},{"./FallingObjectManager.js":4,"./Game.js":6,"./Keyboard.js":8,"./Player.js":9,"./Render.js":10}]},{},[11]);

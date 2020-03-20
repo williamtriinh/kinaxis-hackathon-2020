@@ -14,7 +14,7 @@ function Game(render, player, keyboard, fallingObjectsManager)
     this.player = player;
     this.keyboard = keyboard;
     this.fallingObjectsManager = fallingObjectsManager;
-    this.basket = new Basket(player, keyboard);
+    this.basket = new Basket();
     this.camera = this.render.camera;
     this.gui = new GUI;
     this.loopId = undefined;
@@ -25,6 +25,7 @@ Game.prototype.init = function()
     this.update = this.update.bind(this);
 
     this.camera.attach(this.player);
+    this.basket.attach(this.player);
 
     this.render.renderable.push(this.fallingObjectsManager);
     this.render.renderable.push(this.basket);
