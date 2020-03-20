@@ -196,6 +196,12 @@
                 display: none;
                 width: 100%;
                 height: 100%;
+                /* Pixel perfect rendering */
+                /* https://developer.mozilla.org/en-US/docs/Games/Techniques/Crisp_pixel_art_look */
+                image-rendering: -moz-crisp-edges;
+                image-rendering: -webkit-crisp-edges;
+                image-rendering: pixelated;
+                image-rendering: crisp-edges;
             }
         </style>
     </head>
@@ -213,15 +219,13 @@
             </div>
             <div class="game__ui__wrapper">
                 <div class="game__ui">
-                    <p class="text" id="wave-indicator">Wave 1</p>
+                    <!-- <p class="text" id="wave-indicator">Wave 1</p>
                     <div style="flex: 1;"></div>
                     <p class="text2" style="color: white">Crop quality: 100%</p>
-                    <!-- <div class="game__ui__health-bar"></div> -->
                     <div class="game__ui__health-bar__wrapper">
                         <img id="health-bar__frame" src="/src/assets/art/health-bar0.png">
                         <img id="health-bar__bar" src="/src/assets/art/health-bar1.png">
-                        <!-- <div class="health-bar__frame"></div> -->
-                    </div>
+                    </div> -->
                 </div>
             </div>
             <canvas></canvas>

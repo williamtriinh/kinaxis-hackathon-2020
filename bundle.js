@@ -320,13 +320,68 @@ module.exports = FallingObjectManager;
 /**
  * Manages the GUI.
  */
-function GUI() {}
 
-GUI.prototype.healthValue = 0;
+const healthBarFrameSprite = "/src/assets/art/health-bar0.png";
+const healthBarSprite = "/src/assets/art/health-bar1.png";
+
+function GUI() {
+    GUI.prototype.sprite = {
+        healthBarFrame: {
+            image: new Image(),
+            width: 472,
+            height: 20
+        },
+        healthBar: {
+            image: new Image(),
+            width: 440,
+            height: 12
+        }
+    }
+
+    this.sprite.healthBarFrame.image.src = healthBarFrameSprite;
+    this.sprite.healthBar.image.src = healthBarSprite;
+
+    // Bind methods
+    this.drawText = this.drawText.bind(this);
+}
+
+GUI.prototype.cropQuality = 1;
 GUI.prototype.canvas = document.getElementsByClassName("game__ui")[0];      // The <div> element for adding gui guiElements to.
 GUI.prototype.wave = document.getElementById("wave-indicator");
 GUI.prototype.health = document.getElementById("health-bar__bar");
 GUI.prototype.guiElements = {};
+
+GUI.prototype.draw = function(ctx)
+{
+    // Health bar frame
+    ctx.drawImage(
+        this.sprite.healthBarFrame.image,
+        0,
+        0,
+        this.sprite.healthBarFrame.width,
+        this.sprite.healthBarFrame.height,
+        640 - this.sprite.healthBarFrame.width / 2,
+        700 - this.sprite.healthBarFrame.height / 2,
+        this.sprite.healthBarFrame.width,
+        this.sprite.healthBarFrame.height
+    );
+
+    // Health bar
+    ctx.drawImage(
+        this.sprite.healthBar.image,
+        0,
+        0,
+        this.sprite.healthBar.width,
+        this.sprite.healthBar.height,
+        640 - this.sprite.healthBar.width / 2,
+        700 - this.sprite.healthBar.height / 2,
+        this.sprite.healthBar.width * this.cropQuality, // Modify this property to change health bar length
+        this.sprite.healthBar.height
+    )
+
+    // Crop quality
+    this.drawText(ctx, `CROP QUALITY: ${this.cropQuality * 100}%`, 640, 680);
+}
 
 /**
  * Changes the health of the crops
@@ -334,9 +389,7 @@ GUI.prototype.guiElements = {};
  */
 GUI.prototype.updateHealth = function(x)
 {
-    this.health.style.clipPath = `inset(0 ${100 * x}% 0 0)`;
-    this.health.style.webkitClipPath = `inset(0 ${100 * x}% 0 0)`;
-    GUI.prototype.healthValue += 0.001;
+    GUI.prototype.cropQuality -= 0.001;
 }
 
 GUI.prototype.drawText = function(ctx, text, x, y)
@@ -549,6 +602,7 @@ Player.prototype.draw = function(ctx)
 module.exports = Player;
 },{}],9:[function(require,module,exports){
 const Camera = require("./Camera.js");
+const GUI = require("./GUI.js");
 const mainBackground = "./src/assets/art/main-background.png";
 const interludeBackground = "./src/assets/art/interlude-background.png";
 
@@ -560,6 +614,7 @@ const interludeBackground = "./src/assets/art/interlude-background.png";
  * @param {Canvas} canvas
  * @param {Context} ctx
  */
+let gui = new GUI();
 
 function Render(canvas, ctx)
 {
@@ -613,6 +668,8 @@ Render.prototype.draw = function()
         this.renderable[i].draw(this.ctx);
         this.ctx.translate(this.camera.x, 0);
     }
+
+    gui.draw(this.ctx);
 }
 
 Render.prototype.resizeGame = function()
@@ -647,7 +704,7 @@ Render.prototype.resizeGame = function()
 }
 
 module.exports = Render;
-},{"./Camera.js":2}],10:[function(require,module,exports){
+},{"./Camera.js":2,"./GUI.js":5}],10:[function(require,module,exports){
 /**
  * The "entry" file where the canvas is created and the different components
  * that make up the game (such as the Game, Render) are instantiated.
