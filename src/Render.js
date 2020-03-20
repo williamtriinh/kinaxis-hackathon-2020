@@ -1,4 +1,5 @@
 const Camera = require("./Camera.js");
+const GUI = require("./GUI.js");
 const mainBackground = "./src/assets/art/main-background.png";
 const interludeBackground = "./src/assets/art/interlude-background.png";
 
@@ -10,6 +11,7 @@ const interludeBackground = "./src/assets/art/interlude-background.png";
  * @param {Canvas} canvas
  * @param {Context} ctx
  */
+let gui = new GUI();
 
 function Render(canvas, ctx)
 {
@@ -63,6 +65,8 @@ Render.prototype.draw = function()
         this.renderable[i].draw(this.ctx);
         this.ctx.translate(this.camera.x, 0);
     }
+
+    gui.draw(this.ctx);
 }
 
 Render.prototype.resizeGame = function()

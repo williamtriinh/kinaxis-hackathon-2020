@@ -80,6 +80,13 @@ Player.prototype.update = function()
         this.y = this.floorPosition - this.height / 2;
     }
 
+    // Prevent the player from moving to the right of the screen
+    if (this.x + this.velocity.x >= 1280)
+    {
+        this.x = 1280;
+        this.velocity.x = 0;
+    }
+
     // Update the player's position
     this.x += this.velocity.x;
     this.y += this.velocity.y;
