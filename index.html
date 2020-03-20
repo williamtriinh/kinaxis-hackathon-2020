@@ -49,7 +49,7 @@
             }
 
             .menu__button:hover {
-                cursor: pointer;
+                /* cursor: pointer; */
                 background-color: #ba6156;
             }
 
@@ -60,6 +60,7 @@
 
             .link:hover {
                 color: #c2c2d1;
+                cursor: none;
             }
 
             .text {
@@ -124,6 +125,15 @@
                 display: block;
             }
 
+            .game:hover {
+                cursor: none;
+            }
+
+            #cursor {
+                position: absolute;
+                pointer-events: none;
+            }
+
             /* Game menu */
             .game__menu {
                 display: flex;
@@ -149,6 +159,7 @@
 
             /* In game user interface */
             .game__ui__wrapper {
+                cursor: none;
                 display: none;
                 flex-direction: column;
                 cursor: default;
@@ -158,6 +169,7 @@
             }
 
             .game__ui {
+                cursor: none;
                 display: flex;
                 position: relative;
                 flex: 1;
@@ -196,6 +208,7 @@
                 display: none;
                 width: 100%;
                 height: 100%;
+                cursor: none;
                 /* Pixel perfect rendering */
                 /* https://developer.mozilla.org/en-US/docs/Games/Techniques/Crisp_pixel_art_look */
                 image-rendering: -moz-crisp-edges;
@@ -207,6 +220,7 @@
     </head>
     <body>
         <div class="game">
+            <img id="cursor" src="./src/assets/art/cursor.png">
             <div class="game__menu">
                 <div class="game__menu__btn-wrapper">
                     <p class="title">Game_Name</p>
@@ -219,13 +233,7 @@
             </div>
             <div class="game__ui__wrapper">
                 <div class="game__ui">
-                    <!-- <p class="text" id="wave-indicator">Wave 1</p>
-                    <div style="flex: 1;"></div>
-                    <p class="text2" style="color: white">Crop quality: 100%</p>
-                    <div class="game__ui__health-bar__wrapper">
-                        <img id="health-bar__frame" src="/src/assets/art/health-bar0.png">
-                        <img id="health-bar__bar" src="/src/assets/art/health-bar1.png">
-                    </div> -->
+                    
                 </div>
             </div>
             <canvas></canvas>

@@ -13,6 +13,8 @@ const FallingObjectManager = require("./FallingObjectManager.js")
 
 window.addEventListener("load", () => {
 
+    const cursor = document.getElementById("cursor");
+
     // Retrieve the canvas
     const canvas = document.querySelector("canvas");
     const ctx = canvas.getContext("2d");
@@ -83,7 +85,18 @@ window.addEventListener("load", () => {
         }
     });
 
-    window.addEventListener("resize", () => render.resizeGame());
+    window.addEventListener("resize", () => {
+        render.resizeGame();
+        gameElementRect = document.getElementsByClassName("game")[0].getBoundingClientRect();
+    });
+
+    // Game div element
+    let gameElementRect = document.getElementsByClassName("game")[0].getBoundingClientRect();
+
+    window.addEventListener("mousemove", (ev) => {
+        cursor.style.left = ev.clientX - gameElementRect.left + "px";
+        cursor.style.top = ev.clientY + gameElementRect.y + "px";
+    });
 
     // When the play button is pressed
     document.getElementById("menu__play-btn").addEventListener("click", () => {
