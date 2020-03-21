@@ -56,7 +56,7 @@ FallingObject.prototype.update = function()
     // When the objects are caught by the basket
     // Only allow objects to be caught when colliding with the top of the basket.
     if (this.y + this.velocity.y + this.height / 2 >= basket.y &&
-        this.y + this.velocity.y + this.height / 2 <= basket.y + 10 &&
+        this.y + this.velocity.y + this.height / 2 <= basket.y + 20 &&
         this.x >= basket.x - basket.width / 2 &&
         this.x <= basket.x + basket.width / 2)
     {

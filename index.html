@@ -63,14 +63,14 @@
                 cursor: none;
             }
 
-            .text {
+            .text1 {
                 color: white;
-                text-shadow: 2px 2px #272736;
+                text-shadow: 3px 3px #272736;
             }
 
             .text2 {
                 color: white;
-                text-shadow: 2px 2px #272736;
+                text-shadow: 3px 3px #272736;
             }
 
             @media (orientation: landscape)
@@ -87,7 +87,7 @@
                     font-size: 3vh;
                 }
 
-                .text {
+                .text1 {
                     font-size: 6vh;
                 }
 
@@ -110,7 +110,7 @@
                     font-size: 2vw;
                 }
 
-                .text {
+                .text1 {
                     font-size: 5vw;
                 }
 
@@ -121,17 +121,15 @@
 
             /* Game */
             .game {
+                cursor: none;
                 position: relative;
                 display: block;
-            }
-
-            .game:hover {
-                cursor: none;
             }
 
             #cursor {
                 position: absolute;
                 pointer-events: none;
+                z-index: 100000;
             }
 
             /* Game menu */
@@ -159,48 +157,64 @@
 
             /* In game user interface */
             .game__ui__wrapper {
-                cursor: none;
                 display: none;
                 flex-direction: column;
-                cursor: default;
                 position: absolute;
                 width: 100%;
                 height: 100%;
             }
 
             .game__ui {
-                cursor: none;
-                display: flex;
+                display: none; /* flex */
                 position: relative;
                 flex: 1;
                 flex-direction: column;
                 align-items: center;
-                background-color: transparent;
+                justify-content: center;
+                background-color: #00000075;
             }
 
-            .game__ui__health-bar {
-                background-image: url("/src/assets/art/health-bar0.png");
-                height: 100;
-                width: 100;
+            /* Wave stats */
+            .wave-stats {
+                background-color: #5e315b;
+                border: 4px #f2a65e solid;
+                width: 40%;
+                display: none; /* flex */
+                flex-direction: column;
+                align-items: center;
+                padding: 0.4em 2em;
             }
 
-            .game__ui__health-bar__wrapper {
-                position: relative;
-                width: 36.875%; /* bar_width / base_width */
-                margin-bottom: 0.5%;
+            #wave-stats__title {
+                padding-bottom: 0.2em;
+                text-decoration: underline;
+                color: #f2a65e;
             }
 
-            #health-bar__frame {
+            .wave-stats__item {
                 width: 100%;
             }
 
-            #health-bar__bar {
-                position: absolute;
-                left: 0;
-                top: 0;
+            .wave-stats__item-key {
+                color: #f2a65e;
+                float: left;
+            }
+
+            .wave-stats__item-value {
+                float: right;
+                text-align: right;
+            }
+
+            .wave-stats__divider {
+                box-sizing: border-box;
+                background-color: #f2a65e;
                 width: 100%;
-                clip-path: inset(0 50% 0 0);
-                -webkit-clip-path: inset(0 0% 0 0);
+                height: 0.1em;
+                margin: 0.3em 0;
+            }
+
+            #wave-stats__done-btn {
+                margin-top: 0.8em;
             }
 
             /* Game canvas */
@@ -233,7 +247,31 @@
             </div>
             <div class="game__ui__wrapper">
                 <div class="game__ui">
-                    
+                    <div class="wave-stats">
+                        <p class="text1" id="wave-stats__title">Wave 1</p>
+                        <span class="text2 wave-stats__item">
+                            <p class="wave-stats__item-key">Garbage collected</p>
+                            <p class="wave-stats__item-value" id="wave-stats__collected">8</p>
+                        </span>
+                        <span class="text2 wave-stats__item">
+                            <p class="wave-stats__item-key">Garbage missed</p>
+                            <p class="wave-stats__item-value" id="wave-stats__missed">2</p>
+                        </span>
+                        <span class="text2 wave-stats__item">
+                            <p class="wave-stats__item-key">Crop quality</p>
+                            <p class="wave-stats__item-value" id="wave-stats__crop-quality">80%</p>
+                        </span>
+                        <div class="wave-stats__divider"></div>
+                        <span class="text2 wave-stats__item">
+                            <p class="wave-stats__item-key">Money earned</p>
+                            <p class="wave-stats__item-value" id="wave-stats__money-earned">$233.45</p>
+                        </span>
+                        <span class="text2 wave-stats__item">
+                            <p class="wave-stats__item-key">New balance</p>
+                            <p class="wave-stats__item-value" id="wave-stats__new-balance">$320.85</p>
+                        </span>
+                        <div class="menu__button" id="wave-stats__done-btn">Done</div>
+                    </div>
                 </div>
             </div>
             <canvas></canvas>

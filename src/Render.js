@@ -1,5 +1,5 @@
 const Camera = require("./Camera.js");
-const GUI = require("./GUI.js");
+const { gui } = require("./GUI.js");
 const mainBackground = "./src/assets/art/main-background.png";
 const interludeBackground = "./src/assets/art/interlude-background.png";
 
@@ -11,7 +11,7 @@ const interludeBackground = "./src/assets/art/interlude-background.png";
  * @param {Canvas} canvas
  * @param {Context} ctx
  */
-let gui = new GUI();
+// let gui = new GUI();
 
 function Render(canvas, ctx)
 {

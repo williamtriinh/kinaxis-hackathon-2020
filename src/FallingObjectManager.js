@@ -1,4 +1,5 @@
 const { gameController } = require("./GameController");
+const { gui } = require("./GUI");
 const FallingObject = require("./FallingObject.js");
 const smallFallingObjectSprites = "/src/assets/art/small-falling-objects.png";
 const powerupsSprites = "/src/assets/art/powerups.png";
@@ -28,28 +29,13 @@ function FallingObjectManager()
         //     length: 2
         // }
     ];
-    //     small: {
-    //         image: new Image(),
-    //         length: 5, // How many different sprites there are in the spritesheet
-    //         size: [[8, 10], [8, 16], [14, 12], [10, 10], [8, 6]]    // The width/height of the sprites
-    //                                                                 // (not including white-space)
-    //     },
-    //     large: {
-    //         image: new Image(),
-    //         length: 2
-    //     },
-    //     powerups: {
-    //         image: new Image(),
-    //         length: 2
-    //     },
-    //     powerdowns: {
-    //         image: new Image(),
-    //         length: 2
-    //     }
-    // }
     FallingObjectManager.prototype.fallingObjectsArray = {};      // Contains all the visible falling objects in the game
+    FallingObjectManager.prototype.spawnTimer = 0;
 
     // Binds
+    this.start = this.start.bind(this);
+    this.stop = this.stop.bind(this);
+    this.resetSpawnTimer = this.resetSpawnTimer.bind(this);
     this.missedFallingObject = this.missedFallingObject.bind(this);
     this.caughtFallingObject = this.caughtFallingObject.bind(this);
     this.createFallingObject = this.createFallingObject.bind(this);
@@ -58,13 +44,44 @@ function FallingObjectManager()
     this.fallingObjectSprites[0].image.src = smallFallingObjectSprites;
     this.fallingObjectSprites[1].image.src = powerupsSprites;
 
-    // Create the initial falling object and begin the timer
+    // Add the start/stop methods to the gameController
+    gameController.start = this.start;
+    gameController.stop = this.stop;
 };
 
+/**
+ * Starts the wave
+ */
 FallingObjectManager.prototype.start = function()
 {
-    this.createFallingObject();
-    setTimeout(this.createFallingObject, Math.random() * (5000 - 4000) + 4000);
+    if (!gameController.wave.isRunning)
+    {
+        gameController.wave.isRunning = true;
+        this.resetSpawnTimer();
+    }
+}
+
+/**
+ * Stops the wave
+ */
+FallingObjectManager.prototype.stop = function()
+{
+    // Stop spawning items and display the wave stats
+    gameController.wave.isRunning = false;
+    gameController.calculateMoneyEarned();
+    gui.displayUI("wave");
+}
+
+/**
+ * Resets the timer with a random time
+ */
+FallingObjectManager.prototype.resetSpawnTimer = function()
+{
+    // let min = 1.2;
+    // let max = 3;
+    let min = 0;
+    let max = 0;
+    FallingObjectManager.prototype.spawnTimer = Math.random() * (max - min) + min;
 }
 
 /**
@@ -74,12 +91,12 @@ FallingObjectManager.prototype.start = function()
 FallingObjectManager.prototype.missedFallingObject = function(id)
 {
     delete this.fallingObjectsArray[id];
-    gameController.cropQuality = Math.floor(gameController.cropQuality * 100 - 1) / 100;
-    if (gameController.cropQuality <= 0)
+    gameController.wave.cropQuality = Math.floor(gameController.wave.cropQuality * 100 - 1) / 100;
+    if (gameController.wave.cropQuality <= 0)
     {
-        gameController.cropQuality = 0;
+        gameController.wave.cropQuality = 0;
     }
-    gameController.wave.collected.missed++;
+    gameController.wave.missed++;
 }
 
 /**
@@ -88,7 +105,7 @@ FallingObjectManager.prototype.missedFallingObject = function(id)
 FallingObjectManager.prototype.caughtFallingObject = function(id)
 {
     delete this.fallingObjectsArray[id];
-    gameController.wave.collected.total++;
+    gameController.wave.collected++;
 }
 
 // Method for creating the falling objects
@@ -132,19 +149,15 @@ FallingObjectManager.prototype.createFallingObject = function()
         obj.addCallbacks(this.missedFallingObject, this.caughtFallingObject);
     }
 
+    // Add the object to the array
     this.fallingObjectsArray[`${id}`] = obj;
-
-    if (Object.keys(this.fallingObjectsArray).length <= 10)
-        setTimeout(this.createFallingObject, Math.random() * (5000 - 4000) + 4000);
+    
+    // Increament the amount spawned during the wave
+    gameController.wave.spawned++;
 }
     
 FallingObjectManager.prototype.update = function()
 {
-    // Update the falling objects
-    // for (let i = 0; i < this.fallingObjectsArray.length; i++)
-    // {
-    //     this.fallingObjectsArray[i].update();
-    // }
     for (let i in this.fallingObjectsArray)
     {
         this.fallingObjectsArray[i].update(this.removeFallingObject);
@@ -157,14 +170,33 @@ FallingObjectManager.prototype.update = function()
         this.timer = null;
     }
 
+    // Update the timer
+    if (gameController.wave.isRunning  && !gameController.isPaused)
+    {
+        FallingObjectManager.prototype.spawnTimer -= 0.02; // 1s / 50frames
+        if (this.spawnTimer <= 0) {
+            // Create the fallling object
+            if (gameController.wave.spawned < gameController.wave.max)
+            {
+                this.createFallingObject();
+                this.resetSpawnTimer();
+            }
+            else
+            {
+                // Wait until all the falling objects are gone before displaying
+                // the wave stats
+                if (Object.keys(this.fallingObjectsArray).length <= 0)
+                {
+                    this.stop();
+                }
+            }
+        }
+    }
+
 };
 
 FallingObjectManager.prototype.draw = function(ctx){
 
-    // draw all the objects
-    // for(i = 0; i < this.fallingObjectsArray.length; i++){
-    //     this.fallingObjectsArray[i].draw(ctx)        
-    // }
     for (let i in this.fallingObjectsArray)
     {
         this.fallingObjectsArray[i].draw(ctx);

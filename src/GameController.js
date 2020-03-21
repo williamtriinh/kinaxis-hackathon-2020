@@ -3,13 +3,23 @@
  */
 
 exports.gameController = {
-    cropQuality: 1,
+    isPaused: false,                            // Whether the game is paused
     money: 0,
     wave: {
-        number: 1,                  // Wave number
-        collected: {
-            total: 0,               // Total objects collected
-            missed: 0,              // Objects that were not caught
-        },
+        isRunning: false,                       // Whether a wave is running
+        cropQuality: 1,                         // Crop quality for the current wave
+        number: 1,                              // Wave number
+        spawned: 0,                             // The amount of objects spawned
+        max: 10,                                // The maximum amount of objects allowed to spawn during the wave
+        collected: 0,                           // The amount of objects the player collected succesfully
+        missed: 0,                              // The objects the player missed,
+        moneyEarned: 0,                         // The money earned during the round
+    },
+    start: undefined,
+    stop: undefined,
+    calculateMoneyEarned: function() {
+        // This is an arbitrary formula
+        this.wave.moneyEarned = Math.floor((this.wave.collected * this.wave.cropQuality - this.wave.missed * 1.2) * 100) / 100;
+        this.money += this.wave.moneyEarned;
     }
 }

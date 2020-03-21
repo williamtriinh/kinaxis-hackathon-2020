@@ -1,8 +1,9 @@
-const GUI = require("./GUI.js");
+const { gui } = require("./GUI.js");
 const Keyboard = require("./Keyboard");
+const { gameController } = require("./GameController");
 const basketsSprite = "/src/assets/art/baskets.png";
 
-const gui = new GUI();
+// const gui = new GUI();
 const keyboard = new Keyboard();
 
 function Basket() {
@@ -34,13 +35,20 @@ Basket.prototype.attach = function(player)
 
 Basket.prototype.update = function () {
 
-    if (keyboard.use === 1)
+    if (keyboard.use === 1 && !this.isCarried)
     {
         // checking position of this.x to see if in range and this.y to see if I can pick up the basket
         if (this.player.x > this.x - this.width && this.player.x < this.x + this.width)
         {
-            Basket.prototype.isCarried = !this.isCarried;
+            // Begin the wave
+            Basket.prototype.isCarried = true;
+            gameController.start();
         }
+    }
+
+    if (!gameController.wave.isRunning && this.isCarried)
+    {
+        Basket.prototype.isCarried = false;
     }
 
     if (keyboard.scrollLeft === 1)

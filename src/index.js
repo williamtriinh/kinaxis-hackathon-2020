@@ -9,7 +9,8 @@ const Game = require("./Game.js");
 const Render = require("./Render.js");
 const Player = require("./Player.js");
 const Keyboard = require("./Keyboard.js");
-const FallingObjectManager = require("./FallingObjectManager.js")
+const FallingObjectManager = require("./FallingObjectManager.js");
+const { gui } = require("./GUI");
 
 window.addEventListener("load", () => {
 
@@ -105,5 +106,8 @@ window.addEventListener("load", () => {
         document.querySelector("canvas").style["display"] = "block";
         game.init();
     });
+
+    // Wave stats done button
+    document.getElementById("wave-stats__done-btn").addEventListener("click", () => gui.stopDisplayingUI("wave"));
 
 });
