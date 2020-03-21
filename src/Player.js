@@ -1,3 +1,4 @@
+const { gameController } = require("./GameController");
 const sprite = "./src/assets/art/player.png";
 
 function Player(keyboard)
