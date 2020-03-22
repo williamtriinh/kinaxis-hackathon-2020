@@ -1,8 +1,19 @@
 const Basket = require("./Basket");
+const { gameController } = require("./GameController");
 
 const basket = new Basket();
 
-function FallingObject(id, x, width, height, image)
+/**
+ * 
+ * @param {int} id 
+ * @param {float} x 
+ * @param {float} width 
+ * @param {float} height 
+ * @param {Canvas} image 
+ * @param {int} imageIndex
+ * @param {String} type     The falling object type: "garbage" or "powerup"
+ */
+function FallingObject(id, x, width, height, image, imageIndex, type)
 {
     // parameter x will be random
     this.id = id;
@@ -11,6 +22,8 @@ function FallingObject(id, x, width, height, image)
     this.width = width;
     this.height = height;
     this.image = image;
+    this.imageIndex = imageIndex;
+    this.type = type;
 
     // speed/gravity
     this.velocity = {
@@ -60,6 +73,53 @@ FallingObject.prototype.update = function()
         this.x >= basket.x - basket.width / 2 &&
         this.x <= basket.x + basket.width / 2)
     {
+        if (this.type === "garbage")
+        {
+            switch (this.imageIndex)
+            {
+                // Recycling
+                case 0:
+                case 1:
+                    if (basket.sprite.index === 0)
+                    {
+                        gameController.wave.sortedCorrectly++;
+                    }
+                    else
+                    {
+                        gameController.wave.sortedIncorrectly++;
+                    }
+                    break;
+                // Paper
+                case 3:
+                    if (basket.sprite.index === 1)
+                    {
+                        gameController.wave.sortedCorrectly++;
+                    }
+                    else
+                    {
+                        gameController.wave.sortedIncorrectly++;
+                    }
+                    break;
+                // Waste
+                case 2:
+                case 4:
+                    if (basket.sprite.index === 2)
+                    {
+                        gameController.wave.sortedCorrectly++;
+                    }
+                    else
+                    {
+                        gameController.wave.sortedIncorrectly++;
+                    }
+                    break;
+                default: break;
+            }
+            gameController.wave.collected++;
+        }
+        else
+        {
+            // Powerups
+        }
         this.caughtFallingObject(this.id);
     }
 

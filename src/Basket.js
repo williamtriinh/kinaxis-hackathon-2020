@@ -19,6 +19,7 @@ function Basket() {
     Basket.prototype.sprite = {
         image: new Image(),
         index: 0,   // Which basket we're using
+                    // 0 = recycle, 1 = paper, 2 = waste
         length: 3   // How many sprites there are
     }
     

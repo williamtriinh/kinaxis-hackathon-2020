@@ -15,7 +15,7 @@ exports.gameController = {
         missed: 0,                              // The objects the player missed,
         moneyEarned: 0,                         // The money earned during the round
         sortedCorrectly: 0,                     // Garbage that has been sorted
-        sortedInccorectly: 0,                   // Garbage that has been incorrectly sorted.
+        sortedIncorrectly: 0,                   // Garbage that has been incorrectly sorted.
         maxTime: 3,                             // The max spawn time for falling objects
         minTime: 1,                             // The min spawn time for falling objects
     },
@@ -23,10 +23,11 @@ exports.gameController = {
     stop: undefined,
     calculateMoneyEarned: function() {
         // This is an arbitrary formula
-        this.wave.moneyEarned = Math.floor((100 * this.wave.cropQuality - this.wave.missed + this.wave.collected) * 100) / 100;
+        this.wave.moneyEarned = Math.floor((100 - this.wave.missed - this.wave.sortedIncorrectly + this.wave.collected) * this.wave.cropQuality * 100) / 100;
         this.money += this.wave.moneyEarned;
     },
     nextWave: function() {                      // Goes to the next wave
+        // Reset the wave values
         this.wave.number++;
         this.wave.cropQuality = 1;
         this.wave.spawned = 0;
@@ -35,6 +36,6 @@ exports.gameController = {
         this.wave.missed = 0;
         this.wave.moneyEarned = 0;
         this.wave.sortedCorrectly = 0;
-        this.wave.sortedInccorectly = 0;
+        this.wave.sortedIncorrectly = 0;
     }
 }
