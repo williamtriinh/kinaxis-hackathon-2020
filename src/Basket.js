@@ -35,7 +35,7 @@ Basket.prototype.attach = function(player)
 
 Basket.prototype.update = function () {
 
-    if (keyboard.use === 1 && !this.isCarried)
+    if (keyboard.use === 1 && !this.isCarried && !gameController.isPaused)
     {
         // checking position of this.x to see if in range and this.y to see if I can pick up the basket
         if (this.player.x > this.x - this.width && this.player.x < this.x + this.width)
@@ -51,30 +51,28 @@ Basket.prototype.update = function () {
         Basket.prototype.isCarried = false;
     }
 
-    if (keyboard.scrollLeft === 1)
-    {
-        this.sprite.index--;
-        if (this.sprite.index < 0)
-        {
-            this.sprite.index = this.sprite.length - 1;
-        }
-    }
-
-    if (keyboard.scrollRight === 1)
-    {
-        this.sprite.index = (this.sprite.index + 1) % 3;
-    }
-
     if (this.isCarried)
     {
         // Follow the player
         Basket.prototype.x = this.player.x;
         Basket.prototype.y = this.player.y - this.player.height;
+
+        if (keyboard.scrollLeft === 1) {
+            this.sprite.index--;
+            if (this.sprite.index < 0) {
+                this.sprite.index = this.sprite.length - 1;
+            }
+        }
+
+        if (keyboard.scrollRight === 1) {
+            this.sprite.index = (this.sprite.index + 1) % 3;
+        }
     }
     else
     {
         // Stay on the ground
         Basket.prototype.y = this.floor;
+        Basket.prototype.x = 640;
     }
     
 }
@@ -83,9 +81,9 @@ Basket.prototype.update = function () {
 Basket.prototype.draw = function (ctx) {
 
     // Display the ui indicator
-    if (this.player.x > this.x - this.width && this.player.x < this.x + this.width && !this.isCarried)
+    if (this.player.x > this.x - this.width && this.player.x < this.x + this.width && !this.isCarried && !gameController.isPaused)
     {
-        gui.drawText(ctx, "PRESS 'E' TO BEGIN WAVE!", this.x, this.y - this.height);
+        gui.drawText(ctx, `PRESS 'E' TO BEGIN WAVE ${gameController.wave.number}!`, this.x, this.y - this.height);
     }
 
     // ctx.fillRect(this.x, this.y, this.width, this.height);

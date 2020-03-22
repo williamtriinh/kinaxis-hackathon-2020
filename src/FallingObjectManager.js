@@ -77,11 +77,8 @@ FallingObjectManager.prototype.stop = function()
  */
 FallingObjectManager.prototype.resetSpawnTimer = function()
 {
-    // let min = 1.2;
-    // let max = 3;
-    let min = 0;
-    let max = 0;
-    FallingObjectManager.prototype.spawnTimer = Math.random() * (max - min) + min;
+    const { maxTime, minTime } = gameController.wave;
+    FallingObjectManager.prototype.spawnTimer = Math.random() * (maxTime - minTime) + minTime;
 }
 
 /**

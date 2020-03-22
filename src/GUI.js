@@ -76,6 +76,7 @@ const gui = {
                 // Update the stats
                 document.getElementById("wave-stats__collected").innerHTML = gameController.wave.collected;
                 document.getElementById("wave-stats__missed").innerHTML = gameController.wave.missed;
+                document.getElementById("wave-stats__sorted-correctly").innerHTML = Math.floor(gameController.wave.sortedCorrectly / gameController.wave.max * 10) / 10;
                 document.getElementById("wave-stats__crop-quality").innerHTML = gameController.wave.cropQuality * 100 + "%";
                 document.getElementById("wave-stats__money-earned").innerHTML = gameController.wave.moneyEarned < 0 ? `-$${Math.abs(gameController.wave.moneyEarned)}` : `$${gameController.wave.moneyEarned}`;
                 document.getElementById("wave-stats__new-balance").innerHTML = gameController.money < 0 ? `-$${Math.abs(gameController.money)}` : `$${gameController.money}`;
@@ -93,6 +94,7 @@ const gui = {
                 break;
             case "wave":
                 document.getElementsByClassName("wave-stats")[0].style.display = "none";
+                gameController.nextWave();
                 break;
             default: break;
         }

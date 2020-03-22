@@ -4,6 +4,8 @@
  * @param {player} Player object
  */
 
+const { gameController } = require("./GameController");
+
 const STATE_GAME = 0;               // The falling object part of the game
 const STATE_INTERLUDE = 1;          // The "pause" between the waves for preparing for waves
 
@@ -27,18 +29,14 @@ Camera.prototype.attach = function(player)
 
 Camera.prototype.update = function()
 {
-    if (this.player.x < 0 || this.player.x > this.render.baseWidth && this.state === STATE_GAME)
+    if (this.player.x >= 0)
     {
-        this.state = STATE_INTERLUDE;
-    }
-    else if (this.player.x > 0 && this.state === STATE_INTERLUDE)
-    {
-        this.state = STATE_GAME;
+        Camera.prototype.state = STATE_GAME;
         this.x = 0;
         this.y = 0;
     }
 
-    if (this.state === STATE_INTERLUDE)
+    if (!gameController.wave.isRunning && this.player.x < 0)
     {
         this.x = this.player.x - this.render.baseWidth / 2;
         this.y = this.player.y - this.render.baseHeight / 1.5;
