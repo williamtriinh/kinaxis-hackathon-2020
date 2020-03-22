@@ -102,14 +102,13 @@ FallingObjectManager.prototype.missedFallingObject = function(id)
 FallingObjectManager.prototype.caughtFallingObject = function(id)
 {
     delete this.fallingObjectsArray[id];
-    gameController.wave.collected++;
 }
 
 // Method for creating the falling objects
 FallingObjectManager.prototype.createFallingObject = function()
 {
-    let bePowerup = (Math.floor(Math.random() * 15) === 0 ? true : false); // 1/15 chance of being a powerup
-    let sprite = this.fallingObjectSprites[bePowerup ? 1 : 0];
+    let type = (Math.floor(Math.random() * 15) === 0 ? "powerup" : "garbage"); // 1/15 chance of being a powerup
+    let sprite = this.fallingObjectSprites[type === "powerup" ? 1 : 0];
     let spriteIndex = Math.floor(Math.random() * sprite.length);
     let width = sprite.size[spriteIndex][0] * 3;
     let height = sprite.size[spriteIndex][1] * 3;
@@ -139,7 +138,7 @@ FallingObjectManager.prototype.createFallingObject = function()
         height
     );
 
-    let obj = new FallingObject(`${id}`, x, width, height, image.canvas)
+    let obj = new FallingObject(`${id}`, x, width, height, image.canvas, spriteIndex, type)
     // Add the destroy/caught method to the prototype
     if (obj.destroy === undefined || obj.caughtFallingObject)
     {

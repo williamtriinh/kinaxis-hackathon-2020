@@ -20,6 +20,7 @@ function Basket() {
     Basket.prototype.sprite = {
         image: new Image(),
         index: 0,   // Which basket we're using
+                    // 0 = recycle, 1 = paper, 2 = waste
         length: 3   // How many sprites there are
     }
     
@@ -157,10 +158,21 @@ module.exports = Camera;
 
 },{"./GameController":7}],3:[function(require,module,exports){
 const Basket = require("./Basket");
+const { gameController } = require("./GameController");
 
 const basket = new Basket();
 
-function FallingObject(id, x, width, height, image)
+/**
+ * 
+ * @param {int} id 
+ * @param {float} x 
+ * @param {float} width 
+ * @param {float} height 
+ * @param {Canvas} image 
+ * @param {int} imageIndex
+ * @param {String} type     The falling object type: "garbage" or "powerup"
+ */
+function FallingObject(id, x, width, height, image, imageIndex, type)
 {
     // parameter x will be random
     this.id = id;
@@ -169,6 +181,8 @@ function FallingObject(id, x, width, height, image)
     this.width = width;
     this.height = height;
     this.image = image;
+    this.imageIndex = imageIndex;
+    this.type = type;
 
     // speed/gravity
     this.velocity = {
@@ -218,6 +232,53 @@ FallingObject.prototype.update = function()
         this.x >= basket.x - basket.width / 2 &&
         this.x <= basket.x + basket.width / 2)
     {
+        if (this.type === "garbage")
+        {
+            switch (this.imageIndex)
+            {
+                // Recycling
+                case 0:
+                case 1:
+                    if (basket.sprite.index === 0)
+                    {
+                        gameController.wave.sortedCorrectly++;
+                    }
+                    else
+                    {
+                        gameController.wave.sortedIncorrectly++;
+                    }
+                    break;
+                // Paper
+                case 3:
+                    if (basket.sprite.index === 1)
+                    {
+                        gameController.wave.sortedCorrectly++;
+                    }
+                    else
+                    {
+                        gameController.wave.sortedIncorrectly++;
+                    }
+                    break;
+                // Waste
+                case 2:
+                case 4:
+                    if (basket.sprite.index === 2)
+                    {
+                        gameController.wave.sortedCorrectly++;
+                    }
+                    else
+                    {
+                        gameController.wave.sortedIncorrectly++;
+                    }
+                    break;
+                default: break;
+            }
+            gameController.wave.collected++;
+        }
+        else
+        {
+            // Powerups
+        }
         this.caughtFallingObject(this.id);
     }
 
@@ -234,7 +295,7 @@ FallingObject.prototype.draw = function(ctx)
 module.exports = FallingObject;
 
 
-},{"./Basket":1}],4:[function(require,module,exports){
+},{"./Basket":1,"./GameController":7}],4:[function(require,module,exports){
 const { gameController } = require("./GameController");
 const { gui } = require("./GUI");
 const FallingObject = require("./FallingObject.js");
@@ -339,14 +400,13 @@ FallingObjectManager.prototype.missedFallingObject = function(id)
 FallingObjectManager.prototype.caughtFallingObject = function(id)
 {
     delete this.fallingObjectsArray[id];
-    gameController.wave.collected++;
 }
 
 // Method for creating the falling objects
 FallingObjectManager.prototype.createFallingObject = function()
 {
-    let bePowerup = (Math.floor(Math.random() * 15) === 0 ? true : false); // 1/15 chance of being a powerup
-    let sprite = this.fallingObjectSprites[bePowerup ? 1 : 0];
+    let type = (Math.floor(Math.random() * 15) === 0 ? "powerup" : "garbage"); // 1/15 chance of being a powerup
+    let sprite = this.fallingObjectSprites[type === "powerup" ? 1 : 0];
     let spriteIndex = Math.floor(Math.random() * sprite.length);
     let width = sprite.size[spriteIndex][0] * 3;
     let height = sprite.size[spriteIndex][1] * 3;
@@ -376,7 +436,7 @@ FallingObjectManager.prototype.createFallingObject = function()
         height
     );
 
-    let obj = new FallingObject(`${id}`, x, width, height, image.canvas)
+    let obj = new FallingObject(`${id}`, x, width, height, image.canvas, spriteIndex, type)
     // Add the destroy/caught method to the prototype
     if (obj.destroy === undefined || obj.caughtFallingObject)
     {
@@ -518,8 +578,8 @@ const gui = {
                 // Update the stats
                 document.getElementById("wave-stats__collected").innerHTML = gameController.wave.collected;
                 document.getElementById("wave-stats__missed").innerHTML = gameController.wave.missed;
-                document.getElementById("wave-stats__sorted-correctly").innerHTML = Math.floor(gameController.wave.sortedCorrectly / gameController.wave.max * 10) / 10;
-                document.getElementById("wave-stats__crop-quality").innerHTML = gameController.wave.cropQuality * 100 + "%";
+                document.getElementById("wave-stats__sorted-correctly").innerHTML = `${Math.floor(gameController.wave.sortedCorrectly / gameController.wave.collected * 100)}%`;
+                document.getElementById("wave-stats__crop-quality").innerHTML = `${gameController.wave.cropQuality * 100}%`;
                 document.getElementById("wave-stats__money-earned").innerHTML = gameController.wave.moneyEarned < 0 ? `-$${Math.abs(gameController.wave.moneyEarned)}` : `$${gameController.wave.moneyEarned}`;
                 document.getElementById("wave-stats__new-balance").innerHTML = gameController.money < 0 ? `-$${Math.abs(gameController.money)}` : `$${gameController.money}`;
 
@@ -688,7 +748,7 @@ exports.gameController = {
         missed: 0,                              // The objects the player missed,
         moneyEarned: 0,                         // The money earned during the round
         sortedCorrectly: 0,                     // Garbage that has been sorted
-        sortedInccorectly: 0,                   // Garbage that has been incorrectly sorted.
+        sortedIncorrectly: 0,                   // Garbage that has been incorrectly sorted.
         maxTime: 3,                             // The max spawn time for falling objects
         minTime: 1,                             // The min spawn time for falling objects
     },
@@ -696,10 +756,11 @@ exports.gameController = {
     stop: undefined,
     calculateMoneyEarned: function() {
         // This is an arbitrary formula
-        this.wave.moneyEarned = Math.floor((100 * this.wave.cropQuality - this.wave.missed + this.wave.collected) * 100) / 100;
+        this.wave.moneyEarned = Math.floor((100 - this.wave.missed - this.wave.sortedIncorrectly + this.wave.collected) * this.wave.cropQuality * 100) / 100;
         this.money += this.wave.moneyEarned;
     },
     nextWave: function() {                      // Goes to the next wave
+        // Reset the wave values
         this.wave.number++;
         this.wave.cropQuality = 1;
         this.wave.spawned = 0;
@@ -708,7 +769,7 @@ exports.gameController = {
         this.wave.missed = 0;
         this.wave.moneyEarned = 0;
         this.wave.sortedCorrectly = 0;
-        this.wave.sortedInccorectly = 0;
+        this.wave.sortedIncorrectly = 0;
     }
 }
 },{}],8:[function(require,module,exports){
