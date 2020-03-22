@@ -88,6 +88,13 @@ Player.prototype.update = function()
         this.velocity.x = 0;
     }
 
+    // Prevent the player from move all the way to the left dduring the main game
+    if (this.x + this.velocity.x <= 0 && gameController.wave.isRunning)
+    {
+        this.x = 0;
+        this.velocity.x = 0;
+    }
+
     // Update the player's position
     this.x += this.velocity.x;
     this.y += this.velocity.y;

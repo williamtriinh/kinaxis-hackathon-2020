@@ -36,7 +36,7 @@ Basket.prototype.attach = function(player)
 
 Basket.prototype.update = function () {
 
-    if (keyboard.use === 1 && !this.isCarried)
+    if (keyboard.use === 1 && !this.isCarried && !gameController.isPaused)
     {
         // checking position of this.x to see if in range and this.y to see if I can pick up the basket
         if (this.player.x > this.x - this.width && this.player.x < this.x + this.width)
@@ -52,30 +52,28 @@ Basket.prototype.update = function () {
         Basket.prototype.isCarried = false;
     }
 
-    if (keyboard.scrollLeft === 1)
-    {
-        this.sprite.index--;
-        if (this.sprite.index < 0)
-        {
-            this.sprite.index = this.sprite.length - 1;
-        }
-    }
-
-    if (keyboard.scrollRight === 1)
-    {
-        this.sprite.index = (this.sprite.index + 1) % 3;
-    }
-
     if (this.isCarried)
     {
         // Follow the player
         Basket.prototype.x = this.player.x;
         Basket.prototype.y = this.player.y - this.player.height;
+
+        if (keyboard.scrollLeft === 1) {
+            this.sprite.index--;
+            if (this.sprite.index < 0) {
+                this.sprite.index = this.sprite.length - 1;
+            }
+        }
+
+        if (keyboard.scrollRight === 1) {
+            this.sprite.index = (this.sprite.index + 1) % 3;
+        }
     }
     else
     {
         // Stay on the ground
         Basket.prototype.y = this.floor;
+        Basket.prototype.x = 640;
     }
     
 }
@@ -84,9 +82,9 @@ Basket.prototype.update = function () {
 Basket.prototype.draw = function (ctx) {
 
     // Display the ui indicator
-    if (this.player.x > this.x - this.width && this.player.x < this.x + this.width && !this.isCarried)
+    if (this.player.x > this.x - this.width && this.player.x < this.x + this.width && !this.isCarried && !gameController.isPaused)
     {
-        gui.drawText(ctx, "PRESS 'E' TO BEGIN WAVE!", this.x, this.y - this.height);
+        gui.drawText(ctx, `PRESS 'E' TO BEGIN WAVE ${gameController.wave.number}!`, this.x, this.y - this.height);
     }
 
     // ctx.fillRect(this.x, this.y, this.width, this.height);
@@ -111,6 +109,8 @@ module.exports = Basket;
  * @param {player} Player object
  */
 
+const { gameController } = require("./GameController");
+
 const STATE_GAME = 0;               // The falling object part of the game
 const STATE_INTERLUDE = 1;          // The "pause" between the waves for preparing for waves
 
@@ -134,18 +134,14 @@ Camera.prototype.attach = function(player)
 
 Camera.prototype.update = function()
 {
-    if (this.player.x < 0 || this.player.x > this.render.baseWidth && this.state === STATE_GAME)
+    if (this.player.x >= 0)
     {
-        this.state = STATE_INTERLUDE;
-    }
-    else if (this.player.x > 0 && this.state === STATE_INTERLUDE)
-    {
-        this.state = STATE_GAME;
+        Camera.prototype.state = STATE_GAME;
         this.x = 0;
         this.y = 0;
     }
 
-    if (this.state === STATE_INTERLUDE)
+    if (!gameController.wave.isRunning && this.player.x < 0)
     {
         this.x = this.player.x - this.render.baseWidth / 2;
         this.y = this.player.y - this.render.baseHeight / 1.5;
@@ -159,7 +155,7 @@ Camera.prototype.update = function()
 
 module.exports = Camera;
 
-},{}],3:[function(require,module,exports){
+},{"./GameController":7}],3:[function(require,module,exports){
 const Basket = require("./Basket");
 
 const basket = new Basket();
@@ -318,11 +314,8 @@ FallingObjectManager.prototype.stop = function()
  */
 FallingObjectManager.prototype.resetSpawnTimer = function()
 {
-    // let min = 1.2;
-    // let max = 3;
-    let min = 0;
-    let max = 0;
-    FallingObjectManager.prototype.spawnTimer = Math.random() * (max - min) + min;
+    const { maxTime, minTime } = gameController.wave;
+    FallingObjectManager.prototype.spawnTimer = Math.random() * (maxTime - minTime) + minTime;
 }
 
 /**
@@ -525,6 +518,7 @@ const gui = {
                 // Update the stats
                 document.getElementById("wave-stats__collected").innerHTML = gameController.wave.collected;
                 document.getElementById("wave-stats__missed").innerHTML = gameController.wave.missed;
+                document.getElementById("wave-stats__sorted-correctly").innerHTML = Math.floor(gameController.wave.sortedCorrectly / gameController.wave.max * 10) / 10;
                 document.getElementById("wave-stats__crop-quality").innerHTML = gameController.wave.cropQuality * 100 + "%";
                 document.getElementById("wave-stats__money-earned").innerHTML = gameController.wave.moneyEarned < 0 ? `-$${Math.abs(gameController.wave.moneyEarned)}` : `$${gameController.wave.moneyEarned}`;
                 document.getElementById("wave-stats__new-balance").innerHTML = gameController.money < 0 ? `-$${Math.abs(gameController.money)}` : `$${gameController.money}`;
@@ -542,6 +536,7 @@ const gui = {
                 break;
             case "wave":
                 document.getElementsByClassName("wave-stats")[0].style.display = "none";
+                gameController.nextWave();
                 break;
             default: break;
         }
@@ -692,13 +687,28 @@ exports.gameController = {
         collected: 0,                           // The amount of objects the player collected succesfully
         missed: 0,                              // The objects the player missed,
         moneyEarned: 0,                         // The money earned during the round
+        sortedCorrectly: 0,                     // Garbage that has been sorted
+        sortedInccorectly: 0,                   // Garbage that has been incorrectly sorted.
+        maxTime: 3,                             // The max spawn time for falling objects
+        minTime: 1,                             // The min spawn time for falling objects
     },
     start: undefined,
     stop: undefined,
     calculateMoneyEarned: function() {
         // This is an arbitrary formula
-        this.wave.moneyEarned = Math.floor((this.wave.collected * this.wave.cropQuality - this.wave.missed * 1.2) * 100) / 100;
+        this.wave.moneyEarned = Math.floor((100 * this.wave.cropQuality - this.wave.missed + this.wave.collected) * 100) / 100;
         this.money += this.wave.moneyEarned;
+    },
+    nextWave: function() {                      // Goes to the next wave
+        this.wave.number++;
+        this.wave.cropQuality = 1;
+        this.wave.spawned = 0;
+        this.wave.max = Math.floor(this.wave.max + this.wave.max / 2);
+        this.wave.collected = 0;
+        this.wave.missed = 0;
+        this.wave.moneyEarned = 0;
+        this.wave.sortedCorrectly = 0;
+        this.wave.sortedInccorectly = 0;
     }
 }
 },{}],8:[function(require,module,exports){
@@ -810,6 +820,13 @@ Player.prototype.update = function()
     if (this.x + this.velocity.x >= 1280)
     {
         this.x = 1280;
+        this.velocity.x = 0;
+    }
+
+    // Prevent the player from move all the way to the left dduring the main game
+    if (this.x + this.velocity.x <= 0 && gameController.wave.isRunning)
+    {
+        this.x = 0;
         this.velocity.x = 0;
     }
 
