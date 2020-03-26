@@ -112,7 +112,18 @@ FallingObjectManager.prototype.createFallingObject = function()
     let spriteIndex = Math.floor(Math.random() * sprite.length);
     let width = sprite.size[spriteIndex][0] * 3;
     let height = sprite.size[spriteIndex][1] * 3;
-    let x = Math.random() * (1280 - width);
+    let x;
+    if (type === "garbage" && spriteIndex === 2)
+    {
+        // To keep the plastic bag from going off screen
+        x = Math.random() * (980 - 300) + 300;
+    }
+    else
+    {
+        // For everyting else
+        x = Math.random() * (1280 - width);
+    }
+   
     let flip = (Math.floor((Math.random() * 2)) === 0) ? true : false;
 
     let id = Date.now();
@@ -138,7 +149,7 @@ FallingObjectManager.prototype.createFallingObject = function()
         height
     );
 
-    let obj = new FallingObject(`${id}`, x, width, height, image.canvas, spriteIndex, type)
+    let obj = new FallingObject(`${id}`, x, width, height, flip, image.canvas, spriteIndex, type)
     // Add the destroy/caught method to the prototype
     if (obj.destroy === undefined || obj.caughtFallingObject)
     {

@@ -46,7 +46,6 @@ Game.prototype.update = function()
     {
         this.player.update();
     }
-    
 
     this.keyboard.reset();
 

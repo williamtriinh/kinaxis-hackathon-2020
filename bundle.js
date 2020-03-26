@@ -162,17 +162,46 @@ const { gameController } = require("./GameController");
 
 const basket = new Basket();
 
+const fallPathAnchors = [
+    [0, 150],
+    [-100, 250],
+    [-200, 200],
+    [0, 300],
+    [100, 400],
+    [100, 550]
+];
+
+const fallPathTimes = [
+    2,
+    2,
+    1,
+    0,
+    1,
+    1.5,
+];
+
+const fallPath = function(obj)
+{
+    let speed = 0.2;
+    let x = ((obj.flip ? -1 : 1) * fallPathAnchors[obj.fallPath.anchor][0] + obj.fallPath.initialX) - obj.x;
+    let y = fallPathAnchors[obj.fallPath.anchor][1] - obj.y;
+    let r = Math.sqrt(x * x + y * y);
+    obj.velocity.x += x / r * speed;
+    obj.velocity.y += y / r * speed;
+}
+
 /**
  * 
  * @param {int} id 
  * @param {float} x 
  * @param {float} width 
- * @param {float} height 
+ * @param {float} height
+ * @param {bool} flip       Whether the sprite is flipped
  * @param {Canvas} image 
  * @param {int} imageIndex
  * @param {String} type     The falling object type: "garbage" or "powerup"
  */
-function FallingObject(id, x, width, height, image, imageIndex, type)
+function FallingObject(id, x, width, height, flip, image, imageIndex, type)
 {
     // parameter x will be random
     this.id = id;
@@ -180,9 +209,19 @@ function FallingObject(id, x, width, height, image, imageIndex, type)
     this.y = -height;
     this.width = width;
     this.height = height;
+    this.flip = flip;
     this.image = image;
     this.imageIndex = imageIndex;
     this.type = type;
+    
+    // Only for gabage bag
+    this.fallPath = {
+        isFollowing: true,
+        direction: 1,       // Whether to flip the direction of the path
+        anchor: 0,
+        time: fallPathTimes[0],
+        initialX: x,
+    }
 
     // speed/gravity
     this.velocity = {
@@ -192,6 +231,7 @@ function FallingObject(id, x, width, height, image, imageIndex, type)
 
     //low gravity
     FallingObject.prototype.gravity = .03;
+    FallingObject.prototype.friction = 0.4;
     FallingObject.prototype.floorPosition = 720 - 64;
 
     FallingObject.prototype.missedFallingObject = undefined;
@@ -214,8 +254,41 @@ FallingObject.prototype.addCallbacks = function(_missedFallingObject, _caughtFal
 
 FallingObject.prototype.update = function()
 {
-    // Constantly apply gravity
-    this.velocity.y += this.gravity;
+    // Code for garbage bag only
+    if (this.imageIndex === 2)
+    {
+        if (this.fallPath.isFollowing) {
+            fallPath(this);
+            this.fallPath.time -= 0.02;
+            if (this.fallPath.time <= 0) {
+                if (this.fallPath.anchor < fallPathAnchors.length - 1) {
+                    this.fallPath.anchor++;
+                    this.fallPath.time = fallPathTimes[this.fallPath.anchor];
+                }
+                else {
+                    this.fallPath.isFollowing = false;
+                }
+            }
+        }
+        else
+        {
+            // Apply friction
+            if (this.velocity.x > 0) {
+                this.velocity.x = Math.max(this.velocity.x - this.friction, 0);
+            }
+
+            if (this.velocity.x < 0) {
+                this.velocity.x = Math.min(this.velocity.x + this.friction, 0);
+            }
+
+            // Apply gravity
+            this.velocity.y += this.gravity;
+        }
+    }
+    else
+    {
+        this.velocity.y += this.gravity;
+    }
 
     // Make sure the objects don't fall through the ground
     if (this.y + this.velocity.y + this.height / 2 >= this.floorPosition)
@@ -288,7 +361,7 @@ FallingObject.prototype.update = function()
 
 FallingObject.prototype.draw = function(ctx)
 {    
-    // ctx.fillRect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height);
+    
     ctx.drawImage(this.image, this.x - this.width / 2, this.y - this.height / 2);
 };
 
@@ -410,7 +483,18 @@ FallingObjectManager.prototype.createFallingObject = function()
     let spriteIndex = Math.floor(Math.random() * sprite.length);
     let width = sprite.size[spriteIndex][0] * 3;
     let height = sprite.size[spriteIndex][1] * 3;
-    let x = Math.random() * (1280 - width);
+    let x;
+    if (type === "garbage" && spriteIndex === 2)
+    {
+        // To keep the plastic bag from going off screen
+        x = Math.random() * (980 - 300) + 300;
+    }
+    else
+    {
+        // For everyting else
+        x = Math.random() * (1280 - width);
+    }
+   
     let flip = (Math.floor((Math.random() * 2)) === 0) ? true : false;
 
     let id = Date.now();
@@ -436,7 +520,7 @@ FallingObjectManager.prototype.createFallingObject = function()
         height
     );
 
-    let obj = new FallingObject(`${id}`, x, width, height, image.canvas, spriteIndex, type)
+    let obj = new FallingObject(`${id}`, x, width, height, flip, image.canvas, spriteIndex, type)
     // Add the destroy/caught method to the prototype
     if (obj.destroy === undefined || obj.caughtFallingObject)
     {
@@ -722,7 +806,6 @@ Game.prototype.update = function()
     {
         this.player.update();
     }
-    
 
     this.keyboard.reset();
 
