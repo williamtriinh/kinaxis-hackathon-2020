@@ -19,6 +19,10 @@ exports.gameController = {
         maxTime: 3,                             // The max spawn time for falling objects
         minTime: 1,                             // The min spawn time for falling objects
     },
+    wind: {
+        speed: 0,                             // The wind speed in the game
+        timer: 0
+    },
     start: undefined,
     stop: undefined,
     calculateMoneyEarned: function() {
@@ -37,5 +41,24 @@ exports.gameController = {
         this.wave.moneyEarned = 0;
         this.wave.sortedCorrectly = 0;
         this.wave.sortedIncorrectly = 0;
+    },
+    update: function() {
+        // Wind speed
+        if (this.wave.isRunning)
+        {
+            this.wind.timer -= 0.02;
+            if (this.wind.timer <= 0) {
+                this.wind.timer = Math.random() * (10 - 4) + 4;
+                let noWind = Math.floor(Math.random() * 5) <= 2 ? true : false;
+                if (noWind) {
+                    this.wind.speed = 0;
+                }
+                else {
+                    this.wind.speed = (Math.random() * (0.6 - 0.4) + 0.4) * (Math.floor(Math.random() * 2) === 0 ? -1 : 1);
+                }
+            }
+        }
+
+        console.log(this.wind.speed);
     }
 }

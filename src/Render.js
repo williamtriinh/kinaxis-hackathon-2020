@@ -41,11 +41,7 @@ function Render(canvas, ctx)
 
 Render.prototype.draw = function()
 {
-    // this.ctx.fillStyle = "pink";
-    // this.ctx.fillRect(0, 0, this.baseWidth, this.baseHeight);
-    // this.ctx.clearRect(0, 0, this.baseWidth, this.baseHeight);
 
-    // this.ctx.fillStyle = "black";
     this.ctx.translate(-this.camera.x, 0);
     if (this.camera.x > -this.baseWidth)
     {
@@ -81,22 +77,10 @@ Render.prototype.resizeGame = function()
     if (winHeight * aspectRatio > winWidth) {
         game.style.width = winWidth + "px";
         game.style.height = winWidth / aspectRatio + "px";
-        // this.canvas.style.width = winWidth + "px";
-        // this.canvas.style.height = winWidth / aspectRatio + "px";
-        // menu.style.width = this.canvas.style.width;
-        // menu.style.height = this.canvas.style.height;
-        // this.viewWidth = winWidth;
-        // this.viewHeight = winWidth / aspectRatio;
     }
     else {
         game.style.width = winHeight * aspectRatio + "px";
         game.style.height = winHeight + "px";
-        // this.canvas.style.width = winHeight * aspectRatio + "px";
-        // this.canvas.style.height = winHeight + "px";
-        // menu.style.width = this.canvas.style.width;
-        // menu.style.height = this.canvas.style.height;
-        // this.viewWidth = winHeight * aspectRatio;
-        // this.viewHeight = winHeight;
     }
 }
 

@@ -121,7 +121,7 @@ FallingObjectManager.prototype.createFallingObject = function()
     else
     {
         // For everyting else
-        x = Math.random() * (1280 - width);
+        x = Math.random() * (1280 - 128) + 128;
     }
    
     let flip = (Math.floor((Math.random() * 2)) === 0) ? true : false;
