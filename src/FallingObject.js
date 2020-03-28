@@ -74,6 +74,7 @@ function FallingObject(id, x, width, height, flip, image, imageIndex, type)
     FallingObject.prototype.gravity = .03;
     FallingObject.prototype.friction = 0.4;
     FallingObject.prototype.floorPosition = 720 - 64;
+    FallingObject.prototype.maxHorVelocity = 2;
 
     FallingObject.prototype.missedFallingObject = undefined;
     FallingObject.prototype.caughtFallingObject = undefined;
@@ -128,6 +129,27 @@ FallingObject.prototype.update = function()
     }
     else
     {
+        this.velocity.x += gameController.wind.speed;
+
+        if (this.velocity.x >= this.maxHorVelocity)
+        {
+            this.velocity.x = this.maxHorVelocity;
+        }
+
+        if (this.velocity.x <= -this.maxHorVelocity)
+        {
+            this.velocity.x = -this.maxHorVelocity;
+        }
+
+        // Apply friction
+        if (this.velocity.x > 0) {
+            this.velocity.x = Math.max(this.velocity.x - this.friction, 0);
+        }
+
+        if (this.velocity.x < 0) {
+            this.velocity.x = Math.min(this.velocity.x + this.friction, 0);
+        }
+
         this.velocity.y += this.gravity;
     }
 
@@ -198,6 +220,16 @@ FallingObject.prototype.update = function()
 
     this.x += this.velocity.x;
     this.y += this.velocity.y;
+
+    if (this.x >= 1280)
+    {
+        this.x = 1280;
+    }
+
+    if (this.x <= 0)
+    {
+        this.x = 0;
+    }
 }
 
 FallingObject.prototype.draw = function(ctx)

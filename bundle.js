@@ -233,6 +233,7 @@ function FallingObject(id, x, width, height, flip, image, imageIndex, type)
     FallingObject.prototype.gravity = .03;
     FallingObject.prototype.friction = 0.4;
     FallingObject.prototype.floorPosition = 720 - 64;
+    FallingObject.prototype.maxHorVelocity = 2;
 
     FallingObject.prototype.missedFallingObject = undefined;
     FallingObject.prototype.caughtFallingObject = undefined;
@@ -287,6 +288,27 @@ FallingObject.prototype.update = function()
     }
     else
     {
+        this.velocity.x += gameController.wind.speed;
+
+        if (this.velocity.x >= this.maxHorVelocity)
+        {
+            this.velocity.x = this.maxHorVelocity;
+        }
+
+        if (this.velocity.x <= -this.maxHorVelocity)
+        {
+            this.velocity.x = -this.maxHorVelocity;
+        }
+
+        // Apply friction
+        if (this.velocity.x > 0) {
+            this.velocity.x = Math.max(this.velocity.x - this.friction, 0);
+        }
+
+        if (this.velocity.x < 0) {
+            this.velocity.x = Math.min(this.velocity.x + this.friction, 0);
+        }
+
         this.velocity.y += this.gravity;
     }
 
@@ -357,6 +379,16 @@ FallingObject.prototype.update = function()
 
     this.x += this.velocity.x;
     this.y += this.velocity.y;
+
+    if (this.x >= 1280)
+    {
+        this.x = 1280;
+    }
+
+    if (this.x <= 0)
+    {
+        this.x = 0;
+    }
 }
 
 FallingObject.prototype.draw = function(ctx)
@@ -492,7 +524,7 @@ FallingObjectManager.prototype.createFallingObject = function()
     else
     {
         // For everyting else
-        x = Math.random() * (1280 - width);
+        x = Math.random() * (1280 - 128) + 128;
     }
    
     let flip = (Math.floor((Math.random() * 2)) === 0) ? true : false;
@@ -765,9 +797,8 @@ exports.gui = gui;
  * The code here shouldn't be touched.
  */
 const Basket = require("./Basket.js");
-const Keyboard = require("./Keyboard.js");
-const { gui } = require("./GUI.js");
 const { gameController } = require("./GameController");
+const { weatherVane } = require("./WeatherVane");
 
 function Game(render, player, keyboard, fallingObjectsManager)
 {
@@ -789,6 +820,7 @@ Game.prototype.init = function()
     this.basket.attach(this.player);
 
     this.render.renderable.push(this.fallingObjectsManager);
+    this.render.renderable.push(weatherVane);
     this.render.renderable.push(this.basket);
     this.render.renderable.push(this.player);
 
@@ -799,11 +831,13 @@ Game.prototype.init = function()
 Game.prototype.update = function()
 {
     this.camera.update();
-    this.fallingObjectsManager.update();
     this.basket.update();
 
     if (!gameController.isPaused)
     {
+        gameController.update();
+        this.fallingObjectsManager.update();
+        weatherVane.update();
         this.player.update();
     }
 
@@ -813,7 +847,7 @@ Game.prototype.update = function()
 };
 
 module.exports = Game;
-},{"./Basket.js":1,"./GUI.js":5,"./GameController":7,"./Keyboard.js":8}],7:[function(require,module,exports){
+},{"./Basket.js":1,"./GameController":7,"./WeatherVane":11}],7:[function(require,module,exports){
 /**
  * Handles the game stats such as money, crop quality, wave, etc and manages the flow of the game.
  */
@@ -835,6 +869,10 @@ exports.gameController = {
         maxTime: 3,                             // The max spawn time for falling objects
         minTime: 1,                             // The min spawn time for falling objects
     },
+    wind: {
+        speed: 0,                             // The wind speed in the game
+        timer: 0
+    },
     start: undefined,
     stop: undefined,
     calculateMoneyEarned: function() {
@@ -853,6 +891,25 @@ exports.gameController = {
         this.wave.moneyEarned = 0;
         this.wave.sortedCorrectly = 0;
         this.wave.sortedIncorrectly = 0;
+    },
+    update: function() {
+        // Wind speed
+        if (this.wave.isRunning)
+        {
+            this.wind.timer -= 0.02;
+            if (this.wind.timer <= 0) {
+                this.wind.timer = Math.random() * (10 - 4) + 4;
+                let noWind = Math.floor(Math.random() * 5) <= 2 ? true : false;
+                if (noWind) {
+                    this.wind.speed = 0;
+                }
+                else {
+                    this.wind.speed = (Math.random() * (0.6 - 0.4) + 0.4) * (Math.floor(Math.random() * 2) === 0 ? -1 : 1);
+                }
+            }
+        }
+
+        console.log(this.wind.speed);
     }
 }
 },{}],8:[function(require,module,exports){
@@ -1058,11 +1115,7 @@ function Render(canvas, ctx)
 
 Render.prototype.draw = function()
 {
-    // this.ctx.fillStyle = "pink";
-    // this.ctx.fillRect(0, 0, this.baseWidth, this.baseHeight);
-    // this.ctx.clearRect(0, 0, this.baseWidth, this.baseHeight);
 
-    // this.ctx.fillStyle = "black";
     this.ctx.translate(-this.camera.x, 0);
     if (this.camera.x > -this.baseWidth)
     {
@@ -1098,27 +1151,87 @@ Render.prototype.resizeGame = function()
     if (winHeight * aspectRatio > winWidth) {
         game.style.width = winWidth + "px";
         game.style.height = winWidth / aspectRatio + "px";
-        // this.canvas.style.width = winWidth + "px";
-        // this.canvas.style.height = winWidth / aspectRatio + "px";
-        // menu.style.width = this.canvas.style.width;
-        // menu.style.height = this.canvas.style.height;
-        // this.viewWidth = winWidth;
-        // this.viewHeight = winWidth / aspectRatio;
     }
     else {
         game.style.width = winHeight * aspectRatio + "px";
         game.style.height = winHeight + "px";
-        // this.canvas.style.width = winHeight * aspectRatio + "px";
-        // this.canvas.style.height = winHeight + "px";
-        // menu.style.width = this.canvas.style.width;
-        // menu.style.height = this.canvas.style.height;
-        // this.viewWidth = winHeight * aspectRatio;
-        // this.viewHeight = winHeight;
     }
 }
 
 module.exports = Render;
 },{"./Camera.js":2,"./GUI.js":5}],11:[function(require,module,exports){
+const { gameController } = require("./GameController");
+const weatherVaneSpriteSheet = "/src/assets/art/weather-vane.png";
+
+const weatherVane = {
+    x: 58,
+    y: 656 - 48,
+    width: 48,
+    height: 96,
+    sprite: {
+        image: new Image(),
+        rowIndex: 0, // y
+        columnIndex: 0, // x
+        animationSpeed: 1,
+        dir: 1, // 1 = right, -1 = left
+        size: [1, 1, 8, 8]
+    },
+    update: function() {
+        if (gameController.wave.isRunning)
+        {
+            if (gameController.wind.speed > 0) {
+                this.sprite.rowIndex = 2;
+                this.sprite.dir = 1;
+            }
+            else if (gameController.wind.speed < 0) {
+                this.sprite.rowIndex = 3;
+                this.sprite.dir = -1;
+            }
+            else
+            {
+                if (this.sprite.dir === 1) {
+                    this.sprite.rowIndex = 0;
+                }
+                else {
+                    this.sprite.rowIndex = 1;
+                }
+            }
+        }
+        
+        if (!gameController.wave.isRunning)
+        {
+            if (this.sprite.dir === 1)
+            {
+                this.sprite.rowIndex = 0;
+            }
+            else
+            {
+                this.sprite.rowIndex = 1;
+            }
+        }
+
+        // Animation
+        this.sprite.columnIndex = (this.sprite.columnIndex + this.sprite.animationSpeed * Math.abs(gameController.wind.speed)) % this.sprite.size[this.sprite.rowIndex];
+    },
+    draw: function(ctx) {
+        ctx.drawImage(
+            this.sprite.image,
+            Math.floor(this.sprite.columnIndex) * this.width,
+            Math.floor(this.sprite.rowIndex) * this.height,
+            this.width,
+            this.height,
+            this.x - this.width / 2,
+            this.y - this.height / 2,
+            this.width,
+            this.height
+        );
+    }
+};
+
+weatherVane.sprite.image.src = weatherVaneSpriteSheet;
+
+exports.weatherVane = weatherVane;
+},{"./GameController":7}],12:[function(require,module,exports){
 /**
  * The "entry" file where the canvas is created and the different components
  * that make up the game (such as the Game, Render) are instantiated.
@@ -1232,4 +1345,4 @@ window.addEventListener("load", () => {
     document.getElementById("wave-stats__done-btn").addEventListener("click", () => gui.stopDisplayingUI("wave"));
 
 });
-},{"./FallingObjectManager.js":4,"./GUI":5,"./Game.js":6,"./Keyboard.js":8,"./Player.js":9,"./Render.js":10}]},{},[11]);
+},{"./FallingObjectManager.js":4,"./GUI":5,"./Game.js":6,"./Keyboard.js":8,"./Player.js":9,"./Render.js":10}]},{},[12]);

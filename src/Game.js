@@ -5,9 +5,8 @@
  * The code here shouldn't be touched.
  */
 const Basket = require("./Basket.js");
-const Keyboard = require("./Keyboard.js");
-const { gui } = require("./GUI.js");
 const { gameController } = require("./GameController");
+const { weatherVane } = require("./WeatherVane");
 
 function Game(render, player, keyboard, fallingObjectsManager)
 {
@@ -29,6 +28,7 @@ Game.prototype.init = function()
     this.basket.attach(this.player);
 
     this.render.renderable.push(this.fallingObjectsManager);
+    this.render.renderable.push(weatherVane);
     this.render.renderable.push(this.basket);
     this.render.renderable.push(this.player);
 
@@ -39,11 +39,13 @@ Game.prototype.init = function()
 Game.prototype.update = function()
 {
     this.camera.update();
-    this.fallingObjectsManager.update();
     this.basket.update();
 
     if (!gameController.isPaused)
     {
+        gameController.update();
+        this.fallingObjectsManager.update();
+        weatherVane.update();
         this.player.update();
     }
 
