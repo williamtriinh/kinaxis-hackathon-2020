@@ -39,7 +39,7 @@
                 margin-bottom: 10%;
             }
 
-            .menu__button {
+            .container-button {
                 text-align: center;
                 width: 60%;
                 padding: 4px 0;
@@ -48,7 +48,15 @@
                 color: white;
             }
 
-            .menu__button:hover {
+            .container-button-adapt {
+                text-align: center;
+                padding: 4px 1em;
+                margin-bottom: 2%;
+                background-color: #f2a65e;
+                color: white;
+            }
+
+            .container-button:hover, .container-button-adapt:hover {
                 /* cursor: pointer; */
                 background-color: #ba6156;
             }
@@ -79,7 +87,7 @@
                     font-size: 7vh;
                 }
 
-                .menu__button {
+                .container-button, .container-button-adapt {
                     font-size: 4vh;
                 }
 
@@ -102,7 +110,7 @@
                     font-size: 5vw;
                 }
 
-                .menu__button {
+                .container-button, .container-button-adapt {
                     font-size: 3vw;
                 }
 
@@ -133,8 +141,8 @@
             }
 
             /* Game menu */
-            .game__menu {
-                display: flex;
+            .main-menu {
+                display: flex; /* flex */
                 flex-direction: column;
                 justify-content: center;
                 align-items: flex-end;
@@ -146,13 +154,29 @@
                 background-size: cover;
             }
 
-            .game__menu__btn-wrapper
+            .main-menu__btn-wrapper
             {
                 width: 25%;
                 margin-right: 5%;
                 display: flex;
                 flex-direction: column;
                 align-items: center;
+            }
+
+            /* Settings menu */
+            .settings-menu {
+                display: none;
+                width: 100%;
+                height: 100%;
+                background-color: #5e315b;
+                border: 4px #f2a65e solid;
+                flex-direction: column;
+                padding: 1em 2em;
+            }
+
+            .settings-menu__top {
+                display: flex;
+                flex-direction: row;
             }
 
             /* In game user interface */
@@ -172,6 +196,21 @@
                 align-items: center;
                 justify-content: center;
                 background-color: #00000075;
+            }
+
+            /* Pause menu */
+            .pause-menu {
+                background-color: #5e315b;
+                border: 4px #f2a65e solid;
+                width: 30%;
+                display: none; /* flex */
+                flex-direction: column;
+                align-items: center;
+                padding: 1em 2em;
+            }
+
+            .pause-menu .text2 {
+                margin: 0 0 0.5em 0;
             }
 
             /* Wave stats */
@@ -235,18 +274,33 @@
     <body>
         <div class="game">
             <img id="cursor" src="./src/assets/art/cursor.png">
-            <div class="game__menu">
-                <div class="game__menu__btn-wrapper">
+            <div class="main-menu">
+                <div class="main-menu__btn-wrapper">
                     <p class="title">Game_Name</p>
-                    <p class="menu__button" id="menu__play-btn">Play</p>
-                    <p class="menu__button" id="menu__settings-btn">Settings</p>
-                    <p class="menu__button" id="menu__help-btn">Help</p>
+                    <p class="container-button" id="main-menu__play-btn">Play</p>
+                    <p class="container-button" id="main-menu__settings-btn">Settings</p>
+                    <p class="container-button" id="main-menu__help-btn">Help</p>
                     <div style="height: 36px;"></div>
                     <a href="https://github.com/williamtriinh/kinaxis-hackathon-2020" target="_blank" class="link">Github</a>
                 </div>
             </div>
+            <div class="settings-menu">
+                <div class="settings-menu__top">
+                    <p class="container-button-adapt" id="settings-menu__back-btn">Back</p>
+                </div>
+            </div>
             <div class="game__ui__wrapper">
                 <div class="game__ui">
+                    <!-- Pause menu -->
+                    <div class="pause-menu">
+                        <p class="text2">Game Paused</p>
+                        <p class="container-button" id="pause-menu__resume-btn">Resume</p>
+                        <p class="container-button" id="pause-menu__settings-btn">Settings</p>
+                        <p class="container-button" id="pause-menu__help-btn">Help</p>
+                        <p class="container-button" id="pause-menu__quit-btn">Quit</p>
+                    </div>
+
+                    <!-- Wave stats -->
                     <div class="wave-stats">
                         <p class="text1" id="wave-stats__title">Wave 1</p>
                         <span class="text2 wave-stats__item">
@@ -274,7 +328,7 @@
                             <p class="wave-stats__item-key">New balance</p>
                             <p class="wave-stats__item-value" id="wave-stats__new-balance">$0</p>
                         </span>
-                        <div class="menu__button" id="wave-stats__done-btn">Done</div>
+                        <div class="container-button" id="wave-stats__done-btn">Done</div>
                     </div>
                 </div>
             </div>

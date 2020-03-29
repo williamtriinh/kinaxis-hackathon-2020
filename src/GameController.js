@@ -58,7 +58,5 @@ exports.gameController = {
                 }
             }
         }
-
-        console.log(this.wind.speed);
     }
 }
