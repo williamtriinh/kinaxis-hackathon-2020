@@ -1,9 +1,10 @@
+const { config } = require("./Config");
 const { gameController } = require("./GameController");
 const weatherVaneSpriteSheet = "/src/assets/art/weather-vane.png";
 
 const weatherVane = {
     x: 58,
-    y: 656 - 48,
+    y: config.floorHeight - 48,
     width: 48,
     height: 96,
     sprite: {

@@ -68,7 +68,8 @@ const gui = {
     displayUI: function(type) {
         switch (type)
         {
-            case "menu":
+            case "pause":
+                document.getElementsByClassName("pause-menu")[0].style.display = "flex";
                 break;
             case "wave":
                 document.getElementsByClassName("wave-stats")[0].style.display = "flex";
@@ -90,7 +91,8 @@ const gui = {
     stopDisplayingUI: function(type) {
         switch (type)
         {
-            case "menu":
+            case "pause":
+                document.getElementsByClassName("pause-menu")[0].style.display = "none";
                 break;
             case "wave":
                 document.getElementsByClassName("wave-stats")[0].style.display = "none";

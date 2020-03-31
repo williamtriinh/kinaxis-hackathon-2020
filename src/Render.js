@@ -1,87 +1,76 @@
-const Camera = require("./Camera.js");
+const { camera } = require("./Camera.js");
+const { config } = require("./Config");
 const { gui } = require("./GUI.js");
+
 const mainBackground = "./src/assets/art/main-background.png";
 const interludeBackground = "./src/assets/art/interlude-background.png";
 
-/**
- * Constructor function that handles rendering objects.
- 
- * This code shouldn't be touched.
- * 
- * @param {Canvas} canvas
- * @param {Context} ctx
- */
-// let gui = new GUI();
+// Holds reference to the canvas element and handles rendering the game objects to the canvas
 
-function Render(canvas, ctx)
-{
-    Render.prototype.canvas = canvas;
-    Render.prototype.ctx = ctx;
-    Render.prototype.camera = new Camera(this);
-    Render.prototype.baseWidth = 1280;
-    Render.prototype.baseHeight = 720;
-    Render.prototype.viewWidth = 640;
-    Render.prototype.viewHeight = 360;
-    Render.prototype.renderable = [];
-    Render.prototype.unrenderable = [];
-    Render.prototype.backgroundRenderable = {
+const render = {
+    canvas: undefined,
+    ctx: undefined,
+    renderable: [],
+    unrenderable: [],
+    backgroundRenderable: {
         main: new Image(),
         interlude: new Image()
-    };
+    },
+    init: function() {
+        // Get the canvas element
+        this.canvas = document.querySelector("canvas");
+        this.ctx = this.canvas.getContext("2d");
 
-    this.backgroundRenderable.main.src = mainBackground;
-    this.backgroundRenderable.interlude.src = interludeBackground;
+        // Canvas properties
+        this.ctx.imageSmoothingEnabled = false;
+        this.canvas.width = config.baseWidth;
+        this.canvas.height = config.baseHeight;
 
-    // Initialize the canvas properties
-    this.ctx.imageSmoothingEnabled = false;
-    this.canvas.width = this.baseWidth;
-    this.canvas.height = this.baseHeight;
-    this.resizeGame();
+        this.resizeGame();
+
+        this.backgroundRenderable.main.src = mainBackground;
+        this.backgroundRenderable.interlude.src = interludeBackground;
+
+    },
+    draw: function() {
+        this.ctx.translate(-camera.x, 0);
+        if (camera.x > -config.baseWidth) {
+            this.ctx.drawImage(this.backgroundRenderable.main, 0, 0);
+        }
+
+        if (camera.player.x <= 0) {
+            this.ctx.drawImage(this.backgroundRenderable.interlude, -config.baseWidth, 0);
+        }
+
+        this.ctx.translate(camera.x, 0);
+
+        for (let i = 0; i < this.renderable.length; i++) {
+            this.ctx.translate(-camera.x, 0);
+            this.renderable[i].draw(this.ctx);
+            this.ctx.translate(camera.x, 0);
+        }
+
+        gui.draw(this.ctx);
+    },
+    resizeGame: function() {
+        let winWidth = window.innerWidth;
+        let winHeight = window.innerHeight;
+        let aspectRatio = config.baseWidth / config.baseHeight;
+
+        let game = document.getElementsByClassName("game")[0];
+
+        // Scale the canvas so that it's always the same aspect ratio
+        if (winHeight * aspectRatio > winWidth) {
+            game.style.width = winWidth + "px";
+            game.style.height = winWidth / aspectRatio + "px";
+        }
+        else {
+            game.style.width = winHeight * aspectRatio + "px";
+            game.style.height = winHeight + "px";
+        }
+    }
 }
 
-Render.prototype.draw = function()
-{
+render.init();
 
-    this.ctx.translate(-this.camera.x, 0);
-    if (this.camera.x > -this.baseWidth)
-    {
-        this.ctx.drawImage(this.backgroundRenderable.main, 0, 0);
-    }
-
-    if (this.camera.player.x <= 0)
-    {
-        this.ctx.drawImage(this.backgroundRenderable.interlude, -this.baseWidth, 0);
-    }
-    
-    this.ctx.translate(this.camera.x, 0);
-    
-    for (let i = 0; i < this.renderable.length; i++)
-    {
-        this.ctx.translate(-this.camera.x, 0);
-        this.renderable[i].draw(this.ctx);
-        this.ctx.translate(this.camera.x, 0);
-    }
-
-    gui.draw(this.ctx);
-}
-
-Render.prototype.resizeGame = function()
-{
-    let winWidth = window.innerWidth;
-    let winHeight = window.innerHeight;
-    let aspectRatio = this.baseWidth / this.baseHeight;
-
-    let game = document.getElementsByClassName("game")[0];
-
-    // Scale the canvas so that it's always the same aspect ratio
-    if (winHeight * aspectRatio > winWidth) {
-        game.style.width = winWidth + "px";
-        game.style.height = winWidth / aspectRatio + "px";
-    }
-    else {
-        game.style.width = winHeight * aspectRatio + "px";
-        game.style.height = winHeight + "px";
-    }
-}
-
-module.exports = Render;
+exports.render = render;

@@ -23,8 +23,6 @@ exports.gameController = {
         speed: 0,                             // The wind speed in the game
         timer: 0
     },
-    start: undefined,
-    stop: undefined,
     calculateMoneyEarned: function() {
         // This is an arbitrary formula
         this.wave.moneyEarned = Math.floor((100 - this.wave.missed - this.wave.sortedIncorrectly + this.wave.collected) * this.wave.cropQuality * 100) / 100;
@@ -58,7 +56,5 @@ exports.gameController = {
                 }
             }
         }
-
-        console.log(this.wind.speed);
     }
 }

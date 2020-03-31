@@ -1,51 +1,39 @@
-/** 
- * Handles all camera related actions
- * 
- * @param {player} Player object
- */
-
+const { config } = require("./Config");
 const { gameController } = require("./GameController");
 
-const STATE_GAME = 0;               // The falling object part of the game
-const STATE_INTERLUDE = 1;          // The "pause" between the waves for preparing for waves
+/**
+ * Handles the "camera"
+ */
 
-function Camera(render)
-{
-    this.render = render;
-    this.zoomTimer = undefined;
-    this.isZooming = false;
+const cameraStates = {
+    GAME: 0,            // The falling object part of the game
+    INTERLUDE: 1        // The "pause" between the waves for preparing for waves
 }
 
-Camera.prototype.player = undefined;
-Camera.prototype.x = 0;
-Camera.prototype.y = 0;
-Camera.prototype.zoom = 1;
-Camera.prototype.state = STATE_GAME;
+const camera = {
+    player: undefined,     // The player object
+    x: 0,
+    y: 0,
+    state: cameraStates.GAME,
+    attach: function(obj) {
+        this.player = obj;
+    },
+    update: function() {
+        if (this.player.x >= 0) {
+            this.state = cameraStates.GAME;
+            this.x = 0;
+            this.y = 0;
+        }
 
-Camera.prototype.attach = function(player)
-{
-    this.player = player;
-}
+        if (!gameController.wave.isRunning && this.player.x < 0) {
+            this.x = this.player.x - config.baseWidth / 2;
+            this.y = this.player.y - config.baseHeight / 1.5;
 
-Camera.prototype.update = function()
-{
-    if (this.player.x >= 0)
-    {
-        Camera.prototype.state = STATE_GAME;
-        this.x = 0;
-        this.y = 0;
-    }
-
-    if (!gameController.wave.isRunning && this.player.x < 0)
-    {
-        this.x = this.player.x - this.render.baseWidth / 2;
-        this.y = this.player.y - this.render.baseHeight / 1.5;
-
-        if (this.x <= -this.render.baseWidth)
-        {
-            this.x = -this.render.baseWidth;
+            if (this.x <= -config.baseWidth) {
+                this.x = -config.baseWidth;
+            }
         }
     }
 }
 
-module.exports = Camera;
+exports.camera = camera;
