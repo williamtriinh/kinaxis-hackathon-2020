@@ -5,41 +5,28 @@
  * This code shouldn't be touched
  */
 
-const Game = require("./Game.js");
-const Render = require("./Render.js");
-const Player = require("./Player.js");
-const Keyboard = require("./Keyboard.js");
-const FallingObjectManager = require("./FallingObjectManager.js");
-const { gui } = require("./GUI");
+const { game } = require("./Game");
 const { gameController } = require("./GameController");
+const { gui } = require("./GUI");
+const { keyboard } = require("./Keyboard");
+const { render } = require("./Render");
 const { screenManager, screens } = require("./ScreenManager");
 
 window.addEventListener("load", () => {
 
     const cursor = document.getElementById("cursor");
 
-    // Retrieve the canvas
-    const canvas = document.querySelector("canvas");
-    const ctx = canvas.getContext("2d");
-
-    // Instantiate the game components
-    const keyboard = new Keyboard();
-    const player = new Player(keyboard);
-    const render = new Render(canvas, ctx);
-    const fallingObjectsManager = new FallingObjectManager();
-    const game = new Game(render, player, keyboard, fallingObjectsManager);
-
     // Keyboard event listeners
     window.addEventListener("keypress", (ev) => {
         switch (ev.code) {
             case "KeyE":
-                Keyboard.prototype.use = 1;
+                keyboard.use = 1;
                 break;
             case "KeyJ":
-                Keyboard.prototype.scrollLeft = 1;
+                keyboard.scrollLeft = 1;
                 break;
             case "KeyL":
-                Keyboard.prototype.scrollRight = 1;
+                keyboard.scrollRight = 1;
                 break;
             case "Escape":
                 if (!gameController.isPaused) {
@@ -60,19 +47,19 @@ window.addEventListener("load", () => {
             case "KeyW":
             case "ArrowUp":
             case "Space":
-                Keyboard.prototype.up = 1;
+                keyboard.up = 1;
                 break;
             case "KeyS":
             case "ArrowDown":
-                Keyboard.prototype.down = 1;
+                keyboard.down = 1;
                 break;
             case "KeyA":
             case "ArrowLeft":
-                Keyboard.prototype.left = 1;
+                keyboard.left = 1;
                 break;
             case "KeyD":
             case "ArrowRight":
-                Keyboard.prototype.right = 1;
+                keyboard.right = 1;
                 break;
         }
     });
@@ -82,19 +69,19 @@ window.addEventListener("load", () => {
             case "KeyW":
             case "ArrowUp":
             case "Space":
-                Keyboard.prototype.up = 0;
+                keyboard.up = 0;
                 break;
             case "KeyS":
             case "ArrowDown":
-                Keyboard.prototype.down = 0;
+                keyboard.down = 0;
                 break;
             case "KeyA":
             case "ArrowLeft":
-                Keyboard.prototype.left = 0;
+                keyboard.left = 0;
                 break;
             case "KeyD":
             case "ArrowRight":
-                Keyboard.prototype.right = 0;
+                keyboard.right = 0;
                 break;
         }
     });
@@ -122,7 +109,7 @@ window.addEventListener("load", () => {
         document.getElementsByClassName("game__ui__wrapper")[0].style["display"] = "flex";
         document.querySelector("canvas").style["display"] = "block";
         screenManager.popAndGoTo(screens.game);
-        game.init();
+        game.start();
     });
 
     document.getElementById("main-menu__settings-btn").addEventListener("click", () => {
@@ -159,6 +146,13 @@ window.addEventListener("load", () => {
         document.getElementsByClassName("game__ui__wrapper")[0].style["display"] = "none";
         document.getElementsByClassName("settings-menu")[0].style["display"] = "flex";
         screenManager.goTo(screens.settings);
+    });
+
+    document.getElementById("pause-menu__quit-btn").addEventListener("click", () => {
+        document.querySelector("canvas").style["display"] = "none";
+        document.getElementsByClassName("game__ui__wrapper")[0].style["display"] = "none";
+        document.getElementsByClassName("main-menu")[0].style["display"] = "flex";
+        screenManager.popAndGoTo(screens.mainMenu);
     });
 
     // Wave stats

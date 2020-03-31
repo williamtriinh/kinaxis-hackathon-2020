@@ -1,166 +1,137 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
-const { gui } = require("./GUI.js");
-const Keyboard = require("./Keyboard");
+const { config } = require("./Config");
+const { fallingObjectManagerStart } = require("./FallingObjectManager");
 const { gameController } = require("./GameController");
-const basketsSprite = "/src/assets/art/baskets.png";
+const { gui } = require("./GUI.js");
+const { keyboard } = require("./Keyboard");
+const { player } = require("./Player");
 
-// const gui = new GUI();
-const keyboard = new Keyboard();
+const basketSprites = "/src/assets/art/baskets.png";
 
-function Basket() {
-
-    Basket.prototype.x = 640;
-    Basket.prototype.y = 720 - 24;
-    Basket.prototype.height = 48;
-    Basket.prototype.width = 48;
-    Basket.prototype.floor = 720 - 64 - this.height / 2;
-
-    Basket.prototype.isCarried = false;
-    Basket.prototype.isNearby = false;          // Whether the player is near the container.
-    Basket.prototype.sprite = {
+const basket = {
+    x: config.baseWidth / 2,
+    y: config.baseHeight - 24,
+    width: 48,
+    height: 48,
+    isCarried: false,
+    isNearby: false,
+    sprite: {
         image: new Image(),
-        index: 0,   // Which basket we're using
-                    // 0 = recycle, 1 = paper, 2 = waste
-        length: 3   // How many sprites there are
-    }
-    
-    this.sprite.image.src = basketsSprite;
-
-    Basket.prototype.player = undefined;
-}
-
-// Add player to this basket instance
-Basket.prototype.attach = function(player)
-{
-    Basket.prototype.player = player;
-}
-
-Basket.prototype.update = function () {
-
-    if (keyboard.use === 1 && !this.isCarried && !gameController.isPaused)
-    {
-        // checking position of this.x to see if in range and this.y to see if I can pick up the basket
-        if (this.player.x > this.x - this.width && this.player.x < this.x + this.width)
-        {
-            // Begin the wave
-            Basket.prototype.isCarried = true;
-            gameController.start();
-        }
-    }
-
-    if (!gameController.wave.isRunning && this.isCarried)
-    {
-        Basket.prototype.isCarried = false;
-    }
-
-    if (this.isCarried)
-    {
-        // Follow the player
-        Basket.prototype.x = this.player.x;
-        Basket.prototype.y = this.player.y - this.player.height;
-
-        if (keyboard.scrollLeft === 1) {
-            this.sprite.index--;
-            if (this.sprite.index < 0) {
-                this.sprite.index = this.sprite.length - 1;
+        index: 0,   // Which basket we're using: 0 = blue, 1 = black, 2 = garbage
+        length: 3   // How many sprites there are in this sprite sheet
+    },
+    init: function() {
+        this.sprite.image.src = basketSprites;
+    },
+    update: function() {
+        if (keyboard.use === 1 && !this.isCarried && !gameController.isPaused) {
+            // checking position of this.x to see if in range and this.y to see if I can pick up the basket
+            if (player.x > this.x - this.width && player.x < this.x + this.width) {
+                // Begin the wave
+                this.isCarried = true;
+                fallingObjectManagerStart();
             }
         }
 
-        if (keyboard.scrollRight === 1) {
-            this.sprite.index = (this.sprite.index + 1) % 3;
+        if (!gameController.wave.isRunning && this.isCarried) {
+            this.isCarried = false;
         }
+
+        if (this.isCarried) {
+            // Follow the player
+            this.x = player.x;
+            this.y = player.y - player.height;
+
+            if (keyboard.scrollLeft === 1) {
+                this.sprite.index--;
+                if (this.sprite.index < 0) {
+                    this.sprite.index = this.sprite.length - 1;
+                }
+            }
+
+            if (keyboard.scrollRight === 1) {
+                this.sprite.index = (this.sprite.index + 1) % 3;
+            }
+        }
+        else {
+            // Stay on the ground
+            this.y = config.floorHeight - this.height / 2;
+            this.x = config.baseWidth / 2;
+        }
+    },
+    draw: function(ctx) {
+        // Display the ui indicator
+        if (player.x > this.x - this.width && player.x < this.x + this.width && !this.isCarried && !gameController.isPaused) {
+            gui.drawText(ctx, `PRESS 'E' TO BEGIN WAVE ${gameController.wave.number}!`, this.x, this.y - this.height);
+        }
+
+        // ctx.fillRect(this.x, this.y, this.width, this.height);
+        ctx.drawImage(
+            this.sprite.image,
+            this.sprite.index * this.width,
+            0,
+            this.width,
+            this.height,
+            this.x - this.width / 2,
+            this.y - this.height / 2,
+            this.width,
+            this.height
+        );
     }
-    else
-    {
-        // Stay on the ground
-        Basket.prototype.y = this.floor;
-        Basket.prototype.x = 640;
-    }
-    
-}
+};
 
+basket.init();
 
-Basket.prototype.draw = function (ctx) {
+exports.basket = basket;
+},{"./Config":3,"./FallingObjectManager":5,"./GUI.js":6,"./GameController":8,"./Keyboard":10,"./Player":11}],2:[function(require,module,exports){
+const { config } = require("./Config");
+const { gameController } = require("./GameController");
 
-    // Display the ui indicator
-    if (this.player.x > this.x - this.width && this.player.x < this.x + this.width && !this.isCarried && !gameController.isPaused)
-    {
-        gui.drawText(ctx, `PRESS 'E' TO BEGIN WAVE ${gameController.wave.number}!`, this.x, this.y - this.height);
-    }
-
-    // ctx.fillRect(this.x, this.y, this.width, this.height);
-    ctx.drawImage(
-        this.sprite.image,
-        this.sprite.index * this.width,
-        0,
-        this.width,
-        this.height,
-        this.x - this.width / 2,
-        this.y - this.height / 2,
-        this.width,
-        this.height
-    );
-}
-
-module.exports = Basket;
-},{"./GUI.js":5,"./GameController":7,"./Keyboard":8}],2:[function(require,module,exports){
-/** 
- * Handles all camera related actions
- * 
- * @param {player} Player object
+/**
+ * Handles the "camera"
  */
 
-const { gameController } = require("./GameController");
-
-const STATE_GAME = 0;               // The falling object part of the game
-const STATE_INTERLUDE = 1;          // The "pause" between the waves for preparing for waves
-
-function Camera(render)
-{
-    this.render = render;
-    this.zoomTimer = undefined;
-    this.isZooming = false;
+const cameraStates = {
+    GAME: 0,            // The falling object part of the game
+    INTERLUDE: 1        // The "pause" between the waves for preparing for waves
 }
 
-Camera.prototype.player = undefined;
-Camera.prototype.x = 0;
-Camera.prototype.y = 0;
-Camera.prototype.zoom = 1;
-Camera.prototype.state = STATE_GAME;
+const camera = {
+    player: undefined,     // The player object
+    x: 0,
+    y: 0,
+    state: cameraStates.GAME,
+    attach: function(obj) {
+        this.player = obj;
+    },
+    update: function() {
+        if (this.player.x >= 0) {
+            this.state = cameraStates.GAME;
+            this.x = 0;
+            this.y = 0;
+        }
 
-Camera.prototype.attach = function(player)
-{
-    this.player = player;
-}
+        if (!gameController.wave.isRunning && this.player.x < 0) {
+            this.x = this.player.x - config.baseWidth / 2;
+            this.y = this.player.y - config.baseHeight / 1.5;
 
-Camera.prototype.update = function()
-{
-    if (this.player.x >= 0)
-    {
-        Camera.prototype.state = STATE_GAME;
-        this.x = 0;
-        this.y = 0;
-    }
-
-    if (!gameController.wave.isRunning && this.player.x < 0)
-    {
-        this.x = this.player.x - this.render.baseWidth / 2;
-        this.y = this.player.y - this.render.baseHeight / 1.5;
-
-        if (this.x <= -this.render.baseWidth)
-        {
-            this.x = -this.render.baseWidth;
+            if (this.x <= -config.baseWidth) {
+                this.x = -config.baseWidth;
+            }
         }
     }
 }
 
-module.exports = Camera;
+exports.camera = camera;
 
-},{"./GameController":7}],3:[function(require,module,exports){
-const Basket = require("./Basket");
+},{"./Config":3,"./GameController":8}],3:[function(require,module,exports){
+exports.config = {
+    baseWidth: 1280,                            // The game render width
+    baseHeight: 720,                            // The game render height
+    floorHeight: 656
+}
+},{}],4:[function(require,module,exports){
 const { gameController } = require("./GameController");
-
-const basket = new Basket();
 
 const fallPathAnchors = [
     [0, 150],
@@ -201,7 +172,7 @@ const fallPath = function(obj)
  * @param {int} imageIndex
  * @param {String} type     The falling object type: "garbage" or "powerup"
  */
-function FallingObject(id, x, width, height, flip, image, imageIndex, type)
+function FallingObject(id, x, width, height, flip, image, imageIndex, type, basket)
 {
     // parameter x will be random
     this.id = id;
@@ -237,6 +208,8 @@ function FallingObject(id, x, width, height, flip, image, imageIndex, type)
 
     FallingObject.prototype.missedFallingObject = undefined;
     FallingObject.prototype.caughtFallingObject = undefined;
+
+    FallingObject.prototype.basket = basket;
 
     this.addCallbacks = this.addCallbacks.bind(this);
 };
@@ -322,10 +295,10 @@ FallingObject.prototype.update = function()
 
     // When the objects are caught by the basket
     // Only allow objects to be caught when colliding with the top of the basket.
-    if (this.y + this.velocity.y + this.height / 2 >= basket.y &&
-        this.y + this.velocity.y + this.height / 2 <= basket.y + 20 &&
-        this.x >= basket.x - basket.width / 2 &&
-        this.x <= basket.x + basket.width / 2)
+    if (this.y + this.velocity.y + this.height / 2 >= this.basket.y &&
+        this.y + this.velocity.y + this.height / 2 <= this.basket.y + 20 &&
+        this.x >= this.basket.x - this.basket.width / 2 &&
+        this.x <= this.basket.x + this.basket.width / 2)
     {
         if (this.type === "garbage")
         {
@@ -334,7 +307,7 @@ FallingObject.prototype.update = function()
                 // Recycling
                 case 0:
                 case 1:
-                    if (basket.sprite.index === 0)
+                    if (this.basket.sprite.index === 0)
                     {
                         gameController.wave.sortedCorrectly++;
                     }
@@ -345,7 +318,7 @@ FallingObject.prototype.update = function()
                     break;
                 // Paper
                 case 3:
-                    if (basket.sprite.index === 1)
+                    if (this.basket.sprite.index === 1)
                     {
                         gameController.wave.sortedCorrectly++;
                     }
@@ -357,7 +330,7 @@ FallingObject.prototype.update = function()
                 // Waste
                 case 2:
                 case 4:
-                    if (basket.sprite.index === 2)
+                    if (this.basket.sprite.index === 2)
                     {
                         gameController.wave.sortedCorrectly++;
                     }
@@ -400,22 +373,24 @@ FallingObject.prototype.draw = function(ctx)
 module.exports = FallingObject;
 
 
-},{"./Basket":1,"./GameController":7}],4:[function(require,module,exports){
+},{"./GameController":8}],5:[function(require,module,exports){
+const { config } = require("./Config");
 const { gameController } = require("./GameController");
 const { gui } = require("./GUI");
 const FallingObject = require("./FallingObject.js");
+
 const smallFallingObjectSprites = "/src/assets/art/small-falling-objects.png";
 const powerupsSprites = "/src/assets/art/powerups.png";
 
-function FallingObjectManager()
-{
-    FallingObjectManager.prototype.fallingObjectSprites = [
+const fallingObjectManager = {
+    basket: undefined,
+    fallingObjectSprites: [
         {
             // Small falling objects
             image: new Image(),
             length: 5, // How many different sprites there are in the spritesheet
             size: [[8, 10], [8, 16], [14, 12], [10, 10], [8, 6]]    // The width/height of the sprites, by a factor of 1/3
-                                                                    // (not including white-space).
+            // (not including white-space).
         },
         {
             // Powerups
@@ -431,191 +406,345 @@ function FallingObjectManager()
         //     image: new Image(),
         //     length: 2
         // }
-    ];
-    FallingObjectManager.prototype.fallingObjectsArray = {};      // Contains all the visible falling objects in the game
-    FallingObjectManager.prototype.spawnTimer = 0;
+    ],
+    fallingObjectsArray: {},
+    spawnTimer: 0,
+    attachBasket: function(basket) {
+        this.basket = basket;
+    },
+    init: function() {
+        this.fallingObjectSprites[0].image.src = smallFallingObjectSprites;
+        this.fallingObjectSprites[1].image.src = powerupsSprites;
 
-    // Binds
-    this.start = this.start.bind(this);
-    this.stop = this.stop.bind(this);
-    this.resetSpawnTimer = this.resetSpawnTimer.bind(this);
-    this.missedFallingObject = this.missedFallingObject.bind(this);
-    this.caughtFallingObject = this.caughtFallingObject.bind(this);
-    this.createFallingObject = this.createFallingObject.bind(this);
+        this.start = this.start.bind(this);
+        this.missedFallingObject = this.missedFallingObject.bind(this);
+        this.caughtFallingObject = this.caughtFallingObject.bind(this);
+    },
+    // Starts the wave
+    start: function() {
+        if (!gameController.wave.isRunning) {
+            gameController.wave.isRunning = true;
+            this.resetSpawnTimer();
+        }
+    },
+    // Stops the wave
+    stop: function() {
+        // Stop spawning items and display the wave stats
+        gameController.wave.isRunning = false;
+        gameController.calculateMoneyEarned();
+        gui.displayUI("wave");
+    },
+    // Resets the spawn timer
+    resetSpawnTimer: function() {
+        const { maxTime, minTime } = gameController.wave;
+        this.spawnTimer = Math.random() * (maxTime - minTime) + minTime;
+    },
+    missedFallingObject: function(id) {
+        delete this.fallingObjectsArray[id];
+        gameController.wave.cropQuality = Math.floor(gameController.wave.cropQuality * 100 - 1) / 100;
+        if (gameController.wave.cropQuality <= 0) {
+            gameController.wave.cropQuality = 0;
+        }
+        gameController.wave.missed++;
+    },
+    caughtFallingObject: function(id) {
+        delete this.fallingObjectsArray[id];
+    },
+    createFallingObject: function() {
+        let type = (Math.floor(Math.random() * 15) === 0 ? "powerup" : "garbage"); // 1/15 chance of being a powerup
+        let sprite = this.fallingObjectSprites[type === "powerup" ? 1 : 0];
+        let spriteIndex = Math.floor(Math.random() * sprite.length);
+        let width = sprite.size[spriteIndex][0] * 3;
+        let height = sprite.size[spriteIndex][1] * 3;
+        let x;
+        if (type === "garbage" && spriteIndex === 2) {
+            // To keep the plastic bag from going off screen
+            x = Math.random() * (980 - 300) + 300;
+        }
+        else {
+            // For everyting else
+            x = Math.random() * (config.baseWidth - 128) + 128;
+        }
 
-    // Image sources
-    this.fallingObjectSprites[0].image.src = smallFallingObjectSprites;
-    this.fallingObjectSprites[1].image.src = powerupsSprites;
+        let flip = (Math.floor((Math.random() * 2)) === 0) ? true : false;
 
-    // Add the start/stop methods to the gameController
-    gameController.start = this.start;
-    gameController.stop = this.stop;
-};
+        let id = Date.now();
 
-/**
- * Starts the wave
- */
-FallingObjectManager.prototype.start = function()
-{
-    if (!gameController.wave.isRunning)
-    {
-        gameController.wave.isRunning = true;
-        this.resetSpawnTimer();
-    }
-}
+        let image = document.createElement("canvas").getContext("2d");
+        image.canvas.width = width;
+        image.canvas.height = height;
 
-/**
- * Stops the wave
- */
-FallingObjectManager.prototype.stop = function()
-{
-    // Stop spawning items and display the wave stats
-    gameController.wave.isRunning = false;
-    gameController.calculateMoneyEarned();
-    gui.displayUI("wave");
-}
+        if (flip) {
+            image.scale(-1, 1);             // Flip the image
+            image.translate(-width, 0);     // Offset because of the flip
+        }
+        image.drawImage(
+            sprite.image,
+            spriteIndex * 48 + (48 - width) / 2,
+            (48 - height) / 2,
+            width,
+            height,
+            0,
+            0,
+            width,
+            height
+        );
 
-/**
- * Resets the timer with a random time
- */
-FallingObjectManager.prototype.resetSpawnTimer = function()
-{
-    const { maxTime, minTime } = gameController.wave;
-    FallingObjectManager.prototype.spawnTimer = Math.random() * (maxTime - minTime) + minTime;
-}
+        let obj = new FallingObject(`${id}`, x, width, height, flip, image.canvas, spriteIndex, type, this.basket)
+        // Add the destroy/caught method to the prototype
+        if (obj.destroy === undefined || obj.caughtFallingObject) {
+            obj.addCallbacks(this.missedFallingObject, this.caughtFallingObject);
+        }
 
-/**
- * Removes a falling object by its id
- * @param {id} String The id of the falling object
- */
-FallingObjectManager.prototype.missedFallingObject = function(id)
-{
-    delete this.fallingObjectsArray[id];
-    gameController.wave.cropQuality = Math.floor(gameController.wave.cropQuality * 100 - 1) / 100;
-    if (gameController.wave.cropQuality <= 0)
-    {
-        gameController.wave.cropQuality = 0;
-    }
-    gameController.wave.missed++;
-}
+        // Add the object to the array
+        this.fallingObjectsArray[`${id}`] = obj;
 
-/**
- * When the object was successfully caught
- */
-FallingObjectManager.prototype.caughtFallingObject = function(id)
-{
-    delete this.fallingObjectsArray[id];
-}
+        // Increament the amount spawned during the wave
+        gameController.wave.spawned++;
+    },
+    update: function() {
+        for (let i in this.fallingObjectsArray) {
+            this.fallingObjectsArray[i].update(this.removeFallingObject);
+        }
 
-// Method for creating the falling objects
-FallingObjectManager.prototype.createFallingObject = function()
-{
-    let type = (Math.floor(Math.random() * 15) === 0 ? "powerup" : "garbage"); // 1/15 chance of being a powerup
-    let sprite = this.fallingObjectSprites[type === "powerup" ? 1 : 0];
-    let spriteIndex = Math.floor(Math.random() * sprite.length);
-    let width = sprite.size[spriteIndex][0] * 3;
-    let height = sprite.size[spriteIndex][1] * 3;
-    let x;
-    if (type === "garbage" && spriteIndex === 2)
-    {
-        // To keep the plastic bag from going off screen
-        x = Math.random() * (980 - 300) + 300;
-    }
-    else
-    {
-        // For everyting else
-        x = Math.random() * (1280 - 128) + 128;
-    }
-   
-    let flip = (Math.floor((Math.random() * 2)) === 0) ? true : false;
+        // Stop spawning
+        if (this.fallingObjectsArray.length >= 10 && this.timer !== null) {
+            clearInterval(this.timer);
+            this.timer = null;
+        }
 
-    let id = Date.now();
-
-    let image = document.createElement("canvas").getContext("2d");
-    image.canvas.width = width;
-    image.canvas.height = height;
-    
-    if (flip)
-    {
-        image.scale(-1, 1);             // Flip the image
-        image.translate(-width, 0);     // Offset because of the flip
-    }
-    image.drawImage(
-        sprite.image,
-        spriteIndex * 48 + (48 - width) / 2,
-        (48 - height) / 2,
-        width,
-        height,
-        0,
-        0,
-        width,
-        height
-    );
-
-    let obj = new FallingObject(`${id}`, x, width, height, flip, image.canvas, spriteIndex, type)
-    // Add the destroy/caught method to the prototype
-    if (obj.destroy === undefined || obj.caughtFallingObject)
-    {
-        obj.addCallbacks(this.missedFallingObject, this.caughtFallingObject);
-    }
-
-    // Add the object to the array
-    this.fallingObjectsArray[`${id}`] = obj;
-    
-    // Increament the amount spawned during the wave
-    gameController.wave.spawned++;
-}
-    
-FallingObjectManager.prototype.update = function()
-{
-    for (let i in this.fallingObjectsArray)
-    {
-        this.fallingObjectsArray[i].update(this.removeFallingObject);
-    }
-
-    // Stop spawning
-    if (this.fallingObjectsArray.length >= 10 && this.timer !== null)
-    {
-        clearInterval(this.timer);
-        this.timer = null;
-    }
-
-    // Update the timer
-    if (gameController.wave.isRunning  && !gameController.isPaused)
-    {
-        FallingObjectManager.prototype.spawnTimer -= 0.02; // 1s / 50frames
-        if (this.spawnTimer <= 0) {
-            // Create the fallling object
-            if (gameController.wave.spawned < gameController.wave.max)
-            {
-                this.createFallingObject();
-                this.resetSpawnTimer();
-            }
-            else
-            {
-                // Wait until all the falling objects are gone before displaying
-                // the wave stats
-                if (Object.keys(this.fallingObjectsArray).length <= 0)
-                {
-                    this.stop();
+        // Update the timer
+        if (gameController.wave.isRunning && !gameController.isPaused) {
+            this.spawnTimer -= 0.02; // 1s / 50frames
+            if (this.spawnTimer <= 0) {
+                // Create the fallling object
+                if (gameController.wave.spawned < gameController.wave.max) {
+                    this.createFallingObject();
+                    this.resetSpawnTimer();
+                }
+                else {
+                    // Wait until all the falling objects are gone before displaying
+                    // the wave stats
+                    if (Object.keys(this.fallingObjectsArray).length <= 0) {
+                        this.stop();
+                    }
                 }
             }
         }
+    },
+    draw: function(ctx) {
+        for (let i in this.fallingObjectsArray) {
+            this.fallingObjectsArray[i].draw(ctx);
+        }
     }
-
 };
 
-FallingObjectManager.prototype.draw = function(ctx){
+fallingObjectManager.init();
 
-    for (let i in this.fallingObjectsArray)
-    {
-        this.fallingObjectsArray[i].draw(ctx);
-    }
+exports.fallingObjectManagerStart = fallingObjectManager.start;
+
+exports.fallingObjectManager = fallingObjectManager;
+
+// function FallingObjectManager()
+// {
+//     FallingObjectManager.prototype.fallingObjectSprites = [
+//         {
+//             // Small falling objects
+//             image: new Image(),
+//             length: 5, // How many different sprites there are in the spritesheet
+//             size: [[8, 10], [8, 16], [14, 12], [10, 10], [8, 6]]    // The width/height of the sprites, by a factor of 1/3
+//                                                                     // (not including white-space).
+//         },
+//         {
+//             // Powerups
+//             image: new Image(),
+//             length: 2,
+//             size: [[16, 16], [16, 16]]
+//         },
+//         // {
+//         //     image: new Image(),
+//         //     length: 2
+//         // },
+//         // {
+//         //     image: new Image(),
+//         //     length: 2
+//         // }
+//     ];
+//     FallingObjectManager.prototype.fallingObjectsArray = {};      // Contains all the visible falling objects in the game
+//     FallingObjectManager.prototype.spawnTimer = 0;
+
+//     // Binds
+//     this.start = this.start.bind(this);
+//     this.stop = this.stop.bind(this);
+//     this.resetSpawnTimer = this.resetSpawnTimer.bind(this);
+//     this.missedFallingObject = this.missedFallingObject.bind(this);
+//     this.caughtFallingObject = this.caughtFallingObject.bind(this);
+//     this.createFallingObject = this.createFallingObject.bind(this);
+
+//     // Image sources
+//     this.fallingObjectSprites[0].image.src = smallFallingObjectSprites;
+//     this.fallingObjectSprites[1].image.src = powerupsSprites;
+
+//     // Add the start/stop methods to the gameController
+//     gameController.start = this.start;
+//     gameController.stop = this.stop;
+// };
+
+// /**
+//  * Starts the wave
+//  */
+// FallingObjectManager.prototype.start = function()
+// {
+//     if (!gameController.wave.isRunning)
+//     {
+//         gameController.wave.isRunning = true;
+//         this.resetSpawnTimer();
+//     }
+// }
+
+// /**
+//  * Stops the wave
+//  */
+// FallingObjectManager.prototype.stop = function()
+// {
     
-}
+// }
 
-module.exports = FallingObjectManager;
-},{"./FallingObject.js":3,"./GUI":5,"./GameController":7}],5:[function(require,module,exports){
+// /**
+//  * Resets the timer with a random time
+//  */
+// FallingObjectManager.prototype.resetSpawnTimer = function()
+// {
+//     const { maxTime, minTime } = gameController.wave;
+//     FallingObjectManager.prototype.spawnTimer = Math.random() * (maxTime - minTime) + minTime;
+// }
+
+// /**
+//  * Removes a falling object by its id
+//  * @param {id} String The id of the falling object
+//  */
+// FallingObjectManager.prototype.missedFallingObject = function(id)
+// {
+    
+// }
+
+// /**
+//  * When the object was successfully caught
+//  */
+// FallingObjectManager.prototype.caughtFallingObject = function(id)
+// {
+    
+// }
+
+// // Method for creating the falling objects
+// FallingObjectManager.prototype.createFallingObject = function()
+// {
+//     let type = (Math.floor(Math.random() * 15) === 0 ? "powerup" : "garbage"); // 1/15 chance of being a powerup
+//     let sprite = this.fallingObjectSprites[type === "powerup" ? 1 : 0];
+//     let spriteIndex = Math.floor(Math.random() * sprite.length);
+//     let width = sprite.size[spriteIndex][0] * 3;
+//     let height = sprite.size[spriteIndex][1] * 3;
+//     let x;
+//     if (type === "garbage" && spriteIndex === 2)
+//     {
+//         // To keep the plastic bag from going off screen
+//         x = Math.random() * (980 - 300) + 300;
+//     }
+//     else
+//     {
+//         // For everyting else
+//         x = Math.random() * (1280 - 128) + 128;
+//     }
+   
+//     let flip = (Math.floor((Math.random() * 2)) === 0) ? true : false;
+
+//     let id = Date.now();
+
+//     let image = document.createElement("canvas").getContext("2d");
+//     image.canvas.width = width;
+//     image.canvas.height = height;
+    
+//     if (flip)
+//     {
+//         image.scale(-1, 1);             // Flip the image
+//         image.translate(-width, 0);     // Offset because of the flip
+//     }
+//     image.drawImage(
+//         sprite.image,
+//         spriteIndex * 48 + (48 - width) / 2,
+//         (48 - height) / 2,
+//         width,
+//         height,
+//         0,
+//         0,
+//         width,
+//         height
+//     );
+
+//     let obj = new FallingObject(`${id}`, x, width, height, flip, image.canvas, spriteIndex, type)
+//     // Add the destroy/caught method to the prototype
+//     if (obj.destroy === undefined || obj.caughtFallingObject)
+//     {
+//         obj.addCallbacks(this.missedFallingObject, this.caughtFallingObject);
+//     }
+
+//     // Add the object to the array
+//     this.fallingObjectsArray[`${id}`] = obj;
+    
+//     // Increament the amount spawned during the wave
+//     gameController.wave.spawned++;
+// }
+    
+// FallingObjectManager.prototype.update = function()
+// {
+//     for (let i in this.fallingObjectsArray)
+//     {
+//         this.fallingObjectsArray[i].update(this.removeFallingObject);
+//     }
+
+//     // Stop spawning
+//     if (this.fallingObjectsArray.length >= 10 && this.timer !== null)
+//     {
+//         clearInterval(this.timer);
+//         this.timer = null;
+//     }
+
+//     // Update the timer
+//     if (gameController.wave.isRunning  && !gameController.isPaused)
+//     {
+//         FallingObjectManager.prototype.spawnTimer -= 0.02; // 1s / 50frames
+//         if (this.spawnTimer <= 0) {
+//             // Create the fallling object
+//             if (gameController.wave.spawned < gameController.wave.max)
+//             {
+//                 this.createFallingObject();
+//                 this.resetSpawnTimer();
+//             }
+//             else
+//             {
+//                 // Wait until all the falling objects are gone before displaying
+//                 // the wave stats
+//                 if (Object.keys(this.fallingObjectsArray).length <= 0)
+//                 {
+//                     this.stop();
+//                 }
+//             }
+//         }
+//     }
+
+// };
+
+// FallingObjectManager.prototype.draw = function(ctx){
+
+//     for (let i in this.fallingObjectsArray)
+//     {
+//         this.fallingObjectsArray[i].draw(ctx);
+//     }
+    
+// }
+
+// module.exports = FallingObjectManager;
+},{"./Config":3,"./FallingObject.js":4,"./GUI":6,"./GameController":8}],6:[function(require,module,exports){
 /**
  * Manages the GUI.
  */
@@ -791,65 +920,74 @@ exports.gui = gui;
 // }
 
 // module.exports = GUI;
-},{"./GameController":7}],6:[function(require,module,exports){
+},{"./GameController":8}],7:[function(require,module,exports){
 /**
  * Constructor function responsible for running the update method and
  * updating the various objects on screen.
  * 
  * The code here shouldn't be touched.
  */
-const Basket = require("./Basket.js");
 const { gameController } = require("./GameController");
-const { weatherVane } = require("./WeatherVane");
+const { gameObjectManager } = require("./GameObjectManager");
+const { keyboard } = require("./Keyboard");
+const { render } = require("./Render");
 
-function Game(render, player, keyboard, fallingObjectsManager)
-{
-    this.render = render;
-    this.player = player;
-    this.keyboard = keyboard;
-    this.fallingObjectsManager = fallingObjectsManager;
-    this.basket = new Basket();
-    this.camera = this.render.camera;
-    // this.gui = new GUI();
-    this.loopId = undefined;
+const game = {
+    gameLoopId: undefined,
+    gameObjects: [],
+    start: function() {
+
+        gameObjectManager.init()
+
+        this.gameLoopId = setInterval(this.update, 1000 / 50);
+    },
+    update: function() {
+        if (!gameController.isPaused)
+        {
+            for (let i = 0; i < gameObjectManager.objects.length; i++)
+            {
+                gameObjectManager.objects[i].update();
+            }
+        }
+        gameController.update();
+        keyboard.reset();
+        render.draw();
+    }
 }
 
-Game.prototype.init = function()
-{
-    this.update = this.update.bind(this);
+exports.game = game;
 
-    this.camera.attach(this.player);
-    this.basket.attach(this.player);
+// function Game(render, player, keyboard, fallingObjectsManager)
+// {
+//     Game.prototype.render = render;
+//     Game.prototype.player = player;
+//     Game.prototype.keyboard = keyboard;
+//     Game.prototype.fallingObjectsManager = fallingObjectsManager;
+//     Game.prototype.basket = new Basket();
+//     Game.prototype.camera = this.render.camera;
+//     // this.gui = new GUI();
+//     Game.prototype.loopId = undefined;
+// }
 
-    this.render.renderable.push(this.fallingObjectsManager);
-    this.render.renderable.push(weatherVane);
-    this.render.renderable.push(this.basket);
-    this.render.renderable.push(this.player);
+// Game.prototype.init = function()
+// {
+//     this.update = this.update.bind(this);
 
-    // Begin the update loop
-    loopId = setInterval(this.update, 1000 / 50);
-};
+//     this.camera.attach(this.player);
+//     this.basket.attach(this.player);
 
-Game.prototype.update = function()
-{
-    this.camera.update();
-    this.basket.update();
+//     this.render.renderable.push(this.fallingObjectsManager);
+//     this.render.renderable.push(weatherVane);
+//     this.render.renderable.push(this.basket);
+//     this.render.renderable.push(this.player);
 
-    if (!gameController.isPaused)
-    {
-        gameController.update();
-        this.fallingObjectsManager.update();
-        weatherVane.update();
-        this.player.update();
-    }
+//     // Begin the update loop
+//     loopId = setInterval(this.update, 1000 / 50);
+// };
 
-    this.keyboard.reset();
 
-    this.render.draw();
-};
-
-module.exports = Game;
-},{"./Basket.js":1,"./GameController":7,"./WeatherVane":12}],7:[function(require,module,exports){
+// module.exports = Game;
+},{"./GameController":8,"./GameObjectManager":9,"./Keyboard":10,"./Render":12}],8:[function(require,module,exports){
 /**
  * Handles the game stats such as money, crop quality, wave, etc and manages the flow of the game.
  */
@@ -875,8 +1013,6 @@ exports.gameController = {
         speed: 0,                             // The wind speed in the game
         timer: 0
     },
-    start: undefined,
-    stop: undefined,
     calculateMoneyEarned: function() {
         // This is an arbitrary formula
         this.wave.moneyEarned = Math.floor((100 - this.wave.missed - this.wave.sortedIncorrectly + this.wave.collected) * this.wave.cropQuality * 100) / 100;
@@ -912,254 +1048,250 @@ exports.gameController = {
         }
     }
 }
-},{}],8:[function(require,module,exports){
-function Keyboard()
-{
-    // These values will be either 0 or 1.
-}
-
-Keyboard.prototype.left = 0;
-Keyboard.prototype.right = 0;
-Keyboard.prototype.down = 0;
-Keyboard.prototype.up = 0;
-Keyboard.prototype.use = 0
-Keyboard.prototype.scrollLeft = 0;
-Keyboard.prototype.scrollRight = 0;
-
-Keyboard.prototype.reset = function() {
-    Keyboard.prototype.use = 0;
-    Keyboard.prototype.scrollLeft = 0;
-    Keyboard.prototype.scrollRight = 0;
-}
-
-module.exports = Keyboard;
 },{}],9:[function(require,module,exports){
-const { gameController } = require("./GameController");
-const sprite = "./src/assets/art/player.png";
+const { basket } = require("./Basket");
+const { camera } = require("./Camera");
+const { fallingObjectManager } = require("./FallingObjectManager");
+const { player } = require("./Player");
+const { render } = require("./Render");
+const { weatherVane } = require("./WeatherVane");
 
-function Player(keyboard)
-{
-    this.x = 640;           // Start the player at half the game width
-    this.y = 720 - 64;
-    this.width = 48;        // Should match the sprite width
-    this.height = 48;
-    this.velocity = {
+const gameObjectManager = {
+    objects: [],
+    init: function() {
+        camera.attach(player);
+        fallingObjectManager.attachBasket(basket);
+        this.addGameObjects(true, basket, fallingObjectManager, player, weatherVane);
+        this.addGameObjects(false, camera);
+    },
+    addGameObjects: function(addToRenderable, ...objs) {
+        for (let i = 0; i < objs.length; i++)
+        {
+            this.objects.push(objs[i]);
+            if (addToRenderable)
+            {
+                render.renderable.push(objs[i]);
+            }
+        }
+    }
+}
+
+exports.gameObjectManager = gameObjectManager;
+},{"./Basket":1,"./Camera":2,"./FallingObjectManager":5,"./Player":11,"./Render":12,"./WeatherVane":14}],10:[function(require,module,exports){
+const keyboard = {
+    left: 0,
+    right: 0,
+    down: 0,
+    up: 0,
+    use: 0,
+    scrollLeft: 0,
+    scrollRight: 0,
+    reset: function() {
+        this.use = 0;
+        this.scrollLeft = 0;
+        this.scrollRight = 0;
+    }
+}
+
+exports.keyboard = keyboard;
+},{}],11:[function(require,module,exports){
+const { config } = require("./Config");
+const { keyboard } = require("./Keyboard");
+const { gameController } = require("./GameController");
+const playerSprite = "./src/assets/art/player.png";
+
+const player = {
+    x: config.baseWidth / 2,
+    y: config.floorHeight,
+    width: 48,
+    height: 48,
+    velocity: {
         x: 0,
         y: 0
-    }
-    this.index = 1;
-    this.maxHVelocity = 8;
-    this.acceleration = 0.9; // Applied to the horizontal only
-    this.friction = 0.4;
-    this.gravity = 1;
-    this.jumpSpeed = 15;
-    this.isGrounded = true;
-    this.floorPosition = 720 - 64; // The height at which the "floor" is
-    this.keyboard = keyboard;
-
-    this.sprite = {
+    },
+    maxHVelocity: 8,
+    acceleration: 0.9,
+    friction: 0.4,
+    gravity: 1,
+    jumpSpeed: 15,
+    isGrounded: true,
+    sprite: {
         image: new Image(),
         dir: 0, // 0 = right, 1 = left
         rowIndex: 0, // y
         columnIndex: 0, // x
         animationSpeed: 0.1,
         size: [4, 4, 6, 6] // The size of the row (starting from the top)
-    }
+    },
+    init: function() {
+        this.sprite.image.src = playerSprite;
+    },
+    update: function() {
+        const { left, right, up } = keyboard;
 
-    this.sprite.image.src = sprite;
+        const horDirection = right - left;
 
-    this.applyFriction = this.applyFriction.bind(this);
-};
+        this.applyFriction();
 
-Player.prototype.applyFriction = function()
-{
-    if (this.velocity.x > 0)
-    {
-        this.velocity.x = Math.max(this.velocity.x - this.friction, 0);
-    }
-    
-    if (this.velocity.x < 0)
-    {
-        this.velocity.x = Math.min(this.velocity.x + this.friction, 0);
+        // Apply horizontal acceleration to the player
+        this.velocity.x += horDirection * this.acceleration;
+        this.velocity.y += this.gravity;
+
+        if (this.velocity.x >= this.maxHVelocity || this.velocity.x <= -this.maxHVelocity) {
+            this.velocity.x = this.maxHVelocity * horDirection;
+        }
+
+        if (this.y + this.height / 2 + 2 >= config.floorHeight) {
+            this.velocity.y -= up * this.jumpSpeed;
+        }
+
+        // Make sure the player doesn't pass the floor
+        if (this.y + this.height / 2 + this.velocity.y >= config.floorHeight) {
+            this.velocity.y = 0;
+            this.y = config.floorHeight - this.height / 2;
+        }
+
+        // Prevent the player from moving to the right of the screen
+        if (this.x + this.velocity.x >= config.baseWidth) {
+            this.x = 1280;
+            this.velocity.x = 0;
+        }
+
+        // Prevent the player from move all the way to the left dduring the main game
+        if (this.x + this.velocity.x <= 0 && gameController.wave.isRunning) {
+            this.x = 0;
+            this.velocity.x = 0;
+        }
+
+        // Update the player's position
+        this.x += this.velocity.x;
+        this.y += this.velocity.y;
+
+        // Change the sprite according to the player's current state
+        if (horDirection !== 0) {
+            this.sprite.dir = (horDirection === 1 ? 0 : 1);
+        }
+
+        if (this.velocity.x) {
+            this.sprite.rowIndex = 2 + this.sprite.dir;
+            this.sprite.animationSpeed = 0.3;
+        }
+        else {
+            this.sprite.rowIndex = 0 + this.sprite.dir;
+            this.sprite.animationSpeed = 0.1;
+        }
+
+        // Animate the player
+        this.animateSprite();
+    },
+    draw: function(ctx) {
+        ctx.drawImage(
+            this.sprite.image,
+            Math.floor(this.sprite.columnIndex) * this.width,
+            this.sprite.rowIndex * this.height,
+            this.width,
+            this.height,
+            this.x - this.width / 2,
+            this.y - this.height / 2,
+            this.width,
+            this.height
+        );
+    },
+    applyFriction: function() {
+        if (this.velocity.x > 0) {
+            this.velocity.x = Math.max(this.velocity.x - this.friction, 0);
+        }
+
+        if (this.velocity.x < 0) {
+            this.velocity.x = Math.min(this.velocity.x + this.friction, 0);
+        }
+    },
+    animateSprite: function() {
+        this.sprite.columnIndex = (this.sprite.columnIndex + this.sprite.animationSpeed) % this.sprite.size[this.sprite.rowIndex];
     }
 }
 
-// Handles animating the sprite (by changing the index)
-Player.prototype.animate = function()
-{
-    this.sprite.columnIndex = (this.sprite.columnIndex + this.sprite.animationSpeed) % this.sprite.size[this.sprite.rowIndex];
-}
+player.init();
 
-Player.prototype.update = function()
-{
-    const { left, right, up } = this.keyboard;
-
-    const horDirection = right - left;
-
-    this.applyFriction();
-
-    // Apply horizontal acceleration to the player
-    this.velocity.x += horDirection * this.acceleration;
-    this.velocity.y += this.gravity;
-
-    if (this.velocity.x >= this.maxHVelocity || this.velocity.x <= -this.maxHVelocity)
-    {
-        this.velocity.x = this.maxHVelocity * horDirection;
-    }
-
-    if (this.y + this.height / 2 + 2 >= this.floorPosition) {
-        this.velocity.y -= up * this.jumpSpeed;
-    }
-
-    // Make sure the player doesn't pass the floor
-    if (this.y + this.height / 2 + this.velocity.y >= this.floorPosition) {
-        this.velocity.y = 0;
-        this.y = this.floorPosition - this.height / 2;
-    }
-
-    // Prevent the player from moving to the right of the screen
-    if (this.x + this.velocity.x >= 1280)
-    {
-        this.x = 1280;
-        this.velocity.x = 0;
-    }
-
-    // Prevent the player from move all the way to the left dduring the main game
-    if (this.x + this.velocity.x <= 0 && gameController.wave.isRunning)
-    {
-        this.x = 0;
-        this.velocity.x = 0;
-    }
-
-    // Update the player's position
-    this.x += this.velocity.x;
-    this.y += this.velocity.y;
-
-    // Change the sprite according to the player's current state
-    if (horDirection !== 0)
-    {
-        this.sprite.dir = (horDirection === 1 ? 0 : 1);
-    }
-
-    if (this.velocity.x) {
-        this.sprite.rowIndex = 2 + this.sprite.dir;
-        this.sprite.animationSpeed = 0.3;
-    }
-    else {
-        this.sprite.rowIndex = 0 + this.sprite.dir;
-        this.sprite.animationSpeed = 0.1;
-    }
-
-    // Animate the player
-    this.animate();
-}
-
-Player.prototype.draw = function(ctx)
-{
-    // ctx.fillRect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height);
-    ctx.drawImage(
-        this.sprite.image,
-        Math.floor(this.sprite.columnIndex) * this.width,
-        this.sprite.rowIndex * this.height,
-        this.width,
-        this.height,
-        this.x - this.width / 2,
-        this.y - this.height / 2,
-        this.width,
-        this.height
-    );
-};
-
-module.exports = Player;
-},{"./GameController":7}],10:[function(require,module,exports){
-const Camera = require("./Camera.js");
+exports.player = player;
+},{"./Config":3,"./GameController":8,"./Keyboard":10}],12:[function(require,module,exports){
+const { camera } = require("./Camera.js");
+const { config } = require("./Config");
 const { gui } = require("./GUI.js");
+
 const mainBackground = "./src/assets/art/main-background.png";
 const interludeBackground = "./src/assets/art/interlude-background.png";
 
-/**
- * Constructor function that handles rendering objects.
- 
- * This code shouldn't be touched.
- * 
- * @param {Canvas} canvas
- * @param {Context} ctx
- */
-// let gui = new GUI();
+// Holds reference to the canvas element and handles rendering the game objects to the canvas
 
-function Render(canvas, ctx)
-{
-    Render.prototype.canvas = canvas;
-    Render.prototype.ctx = ctx;
-    Render.prototype.camera = new Camera(this);
-    Render.prototype.baseWidth = 1280;
-    Render.prototype.baseHeight = 720;
-    Render.prototype.viewWidth = 640;
-    Render.prototype.viewHeight = 360;
-    Render.prototype.renderable = [];
-    Render.prototype.unrenderable = [];
-    Render.prototype.backgroundRenderable = {
+const render = {
+    canvas: undefined,
+    ctx: undefined,
+    renderable: [],
+    unrenderable: [],
+    backgroundRenderable: {
         main: new Image(),
         interlude: new Image()
-    };
+    },
+    init: function() {
+        // Get the canvas element
+        this.canvas = document.querySelector("canvas");
+        this.ctx = this.canvas.getContext("2d");
 
-    this.backgroundRenderable.main.src = mainBackground;
-    this.backgroundRenderable.interlude.src = interludeBackground;
+        // Canvas properties
+        this.ctx.imageSmoothingEnabled = false;
+        this.canvas.width = config.baseWidth;
+        this.canvas.height = config.baseHeight;
 
-    // Initialize the canvas properties
-    this.ctx.imageSmoothingEnabled = false;
-    this.canvas.width = this.baseWidth;
-    this.canvas.height = this.baseHeight;
-    this.resizeGame();
+        this.resizeGame();
+
+        this.backgroundRenderable.main.src = mainBackground;
+        this.backgroundRenderable.interlude.src = interludeBackground;
+
+    },
+    draw: function() {
+        this.ctx.translate(-camera.x, 0);
+        if (camera.x > -config.baseWidth) {
+            this.ctx.drawImage(this.backgroundRenderable.main, 0, 0);
+        }
+
+        if (camera.player.x <= 0) {
+            this.ctx.drawImage(this.backgroundRenderable.interlude, -config.baseWidth, 0);
+        }
+
+        this.ctx.translate(camera.x, 0);
+
+        for (let i = 0; i < this.renderable.length; i++) {
+            this.ctx.translate(-camera.x, 0);
+            this.renderable[i].draw(this.ctx);
+            this.ctx.translate(camera.x, 0);
+        }
+
+        gui.draw(this.ctx);
+    },
+    resizeGame: function() {
+        let winWidth = window.innerWidth;
+        let winHeight = window.innerHeight;
+        let aspectRatio = config.baseWidth / config.baseHeight;
+
+        let game = document.getElementsByClassName("game")[0];
+
+        // Scale the canvas so that it's always the same aspect ratio
+        if (winHeight * aspectRatio > winWidth) {
+            game.style.width = winWidth + "px";
+            game.style.height = winWidth / aspectRatio + "px";
+        }
+        else {
+            game.style.width = winHeight * aspectRatio + "px";
+            game.style.height = winHeight + "px";
+        }
+    }
 }
 
-Render.prototype.draw = function()
-{
+render.init();
 
-    this.ctx.translate(-this.camera.x, 0);
-    if (this.camera.x > -this.baseWidth)
-    {
-        this.ctx.drawImage(this.backgroundRenderable.main, 0, 0);
-    }
-
-    if (this.camera.player.x <= 0)
-    {
-        this.ctx.drawImage(this.backgroundRenderable.interlude, -this.baseWidth, 0);
-    }
-    
-    this.ctx.translate(this.camera.x, 0);
-    
-    for (let i = 0; i < this.renderable.length; i++)
-    {
-        this.ctx.translate(-this.camera.x, 0);
-        this.renderable[i].draw(this.ctx);
-        this.ctx.translate(this.camera.x, 0);
-    }
-
-    gui.draw(this.ctx);
-}
-
-Render.prototype.resizeGame = function()
-{
-    let winWidth = window.innerWidth;
-    let winHeight = window.innerHeight;
-    let aspectRatio = this.baseWidth / this.baseHeight;
-
-    let game = document.getElementsByClassName("game")[0];
-
-    // Scale the canvas so that it's always the same aspect ratio
-    if (winHeight * aspectRatio > winWidth) {
-        game.style.width = winWidth + "px";
-        game.style.height = winWidth / aspectRatio + "px";
-    }
-    else {
-        game.style.width = winHeight * aspectRatio + "px";
-        game.style.height = winHeight + "px";
-    }
-}
-
-module.exports = Render;
-},{"./Camera.js":2,"./GUI.js":5}],11:[function(require,module,exports){
+exports.render = render;
+},{"./Camera.js":2,"./Config":3,"./GUI.js":6}],13:[function(require,module,exports){
 const screens = {
     mainMenu: "mainMenu",
     game: "game",
@@ -1213,13 +1345,14 @@ const screenManager = {
 
 exports.screens = screens;
 exports.screenManager = screenManager;
-},{}],12:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
+const { config } = require("./Config");
 const { gameController } = require("./GameController");
 const weatherVaneSpriteSheet = "/src/assets/art/weather-vane.png";
 
 const weatherVane = {
     x: 58,
-    y: 656 - 48,
+    y: config.floorHeight - 48,
     width: 48,
     height: 96,
     sprite: {
@@ -1285,7 +1418,7 @@ const weatherVane = {
 weatherVane.sprite.image.src = weatherVaneSpriteSheet;
 
 exports.weatherVane = weatherVane;
-},{"./GameController":7}],13:[function(require,module,exports){
+},{"./Config":3,"./GameController":8}],15:[function(require,module,exports){
 /**
  * The "entry" file where the canvas is created and the different components
  * that make up the game (such as the Game, Render) are instantiated.
@@ -1293,41 +1426,28 @@ exports.weatherVane = weatherVane;
  * This code shouldn't be touched
  */
 
-const Game = require("./Game.js");
-const Render = require("./Render.js");
-const Player = require("./Player.js");
-const Keyboard = require("./Keyboard.js");
-const FallingObjectManager = require("./FallingObjectManager.js");
-const { gui } = require("./GUI");
+const { game } = require("./Game");
 const { gameController } = require("./GameController");
+const { gui } = require("./GUI");
+const { keyboard } = require("./Keyboard");
+const { render } = require("./Render");
 const { screenManager, screens } = require("./ScreenManager");
 
 window.addEventListener("load", () => {
 
     const cursor = document.getElementById("cursor");
 
-    // Retrieve the canvas
-    const canvas = document.querySelector("canvas");
-    const ctx = canvas.getContext("2d");
-
-    // Instantiate the game components
-    const keyboard = new Keyboard();
-    const player = new Player(keyboard);
-    const render = new Render(canvas, ctx);
-    const fallingObjectsManager = new FallingObjectManager();
-    const game = new Game(render, player, keyboard, fallingObjectsManager);
-
     // Keyboard event listeners
     window.addEventListener("keypress", (ev) => {
         switch (ev.code) {
             case "KeyE":
-                Keyboard.prototype.use = 1;
+                keyboard.use = 1;
                 break;
             case "KeyJ":
-                Keyboard.prototype.scrollLeft = 1;
+                keyboard.scrollLeft = 1;
                 break;
             case "KeyL":
-                Keyboard.prototype.scrollRight = 1;
+                keyboard.scrollRight = 1;
                 break;
             case "Escape":
                 if (!gameController.isPaused) {
@@ -1348,19 +1468,19 @@ window.addEventListener("load", () => {
             case "KeyW":
             case "ArrowUp":
             case "Space":
-                Keyboard.prototype.up = 1;
+                keyboard.up = 1;
                 break;
             case "KeyS":
             case "ArrowDown":
-                Keyboard.prototype.down = 1;
+                keyboard.down = 1;
                 break;
             case "KeyA":
             case "ArrowLeft":
-                Keyboard.prototype.left = 1;
+                keyboard.left = 1;
                 break;
             case "KeyD":
             case "ArrowRight":
-                Keyboard.prototype.right = 1;
+                keyboard.right = 1;
                 break;
         }
     });
@@ -1370,19 +1490,19 @@ window.addEventListener("load", () => {
             case "KeyW":
             case "ArrowUp":
             case "Space":
-                Keyboard.prototype.up = 0;
+                keyboard.up = 0;
                 break;
             case "KeyS":
             case "ArrowDown":
-                Keyboard.prototype.down = 0;
+                keyboard.down = 0;
                 break;
             case "KeyA":
             case "ArrowLeft":
-                Keyboard.prototype.left = 0;
+                keyboard.left = 0;
                 break;
             case "KeyD":
             case "ArrowRight":
-                Keyboard.prototype.right = 0;
+                keyboard.right = 0;
                 break;
         }
     });
@@ -1410,7 +1530,7 @@ window.addEventListener("load", () => {
         document.getElementsByClassName("game__ui__wrapper")[0].style["display"] = "flex";
         document.querySelector("canvas").style["display"] = "block";
         screenManager.popAndGoTo(screens.game);
-        game.init();
+        game.start();
     });
 
     document.getElementById("main-menu__settings-btn").addEventListener("click", () => {
@@ -1449,10 +1569,17 @@ window.addEventListener("load", () => {
         screenManager.goTo(screens.settings);
     });
 
+    document.getElementById("pause-menu__quit-btn").addEventListener("click", () => {
+        document.querySelector("canvas").style["display"] = "none";
+        document.getElementsByClassName("game__ui__wrapper")[0].style["display"] = "none";
+        document.getElementsByClassName("main-menu")[0].style["display"] = "flex";
+        screenManager.popAndGoTo(screens.mainMenu);
+    });
+
     // Wave stats
     // Wave stats done button
     document.getElementById("wave-stats__done-btn").addEventListener("click", () => gui.stopDisplayingUI("wave"));
     // End of button event listeners
 
 });
-},{"./FallingObjectManager.js":4,"./GUI":5,"./Game.js":6,"./GameController":7,"./Keyboard.js":8,"./Player.js":9,"./Render.js":10,"./ScreenManager":11}]},{},[13]);
+},{"./GUI":6,"./Game":7,"./GameController":8,"./Keyboard":10,"./Render":12,"./ScreenManager":13}]},{},[15]);

@@ -1,20 +1,16 @@
-function Keyboard()
-{
-    // These values will be either 0 or 1.
+const keyboard = {
+    left: 0,
+    right: 0,
+    down: 0,
+    up: 0,
+    use: 0,
+    scrollLeft: 0,
+    scrollRight: 0,
+    reset: function() {
+        this.use = 0;
+        this.scrollLeft = 0;
+        this.scrollRight = 0;
+    }
 }
 
-Keyboard.prototype.left = 0;
-Keyboard.prototype.right = 0;
-Keyboard.prototype.down = 0;
-Keyboard.prototype.up = 0;
-Keyboard.prototype.use = 0
-Keyboard.prototype.scrollLeft = 0;
-Keyboard.prototype.scrollRight = 0;
-
-Keyboard.prototype.reset = function() {
-    Keyboard.prototype.use = 0;
-    Keyboard.prototype.scrollLeft = 0;
-    Keyboard.prototype.scrollRight = 0;
-}
-
-module.exports = Keyboard;
+exports.keyboard = keyboard;

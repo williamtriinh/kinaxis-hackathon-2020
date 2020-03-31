@@ -1,7 +1,4 @@
-const Basket = require("./Basket");
 const { gameController } = require("./GameController");
-
-const basket = new Basket();
 
 const fallPathAnchors = [
     [0, 150],
@@ -42,7 +39,7 @@ const fallPath = function(obj)
  * @param {int} imageIndex
  * @param {String} type     The falling object type: "garbage" or "powerup"
  */
-function FallingObject(id, x, width, height, flip, image, imageIndex, type)
+function FallingObject(id, x, width, height, flip, image, imageIndex, type, basket)
 {
     // parameter x will be random
     this.id = id;
@@ -78,6 +75,8 @@ function FallingObject(id, x, width, height, flip, image, imageIndex, type)
 
     FallingObject.prototype.missedFallingObject = undefined;
     FallingObject.prototype.caughtFallingObject = undefined;
+
+    FallingObject.prototype.basket = basket;
 
     this.addCallbacks = this.addCallbacks.bind(this);
 };
@@ -163,10 +162,10 @@ FallingObject.prototype.update = function()
 
     // When the objects are caught by the basket
     // Only allow objects to be caught when colliding with the top of the basket.
-    if (this.y + this.velocity.y + this.height / 2 >= basket.y &&
-        this.y + this.velocity.y + this.height / 2 <= basket.y + 20 &&
-        this.x >= basket.x - basket.width / 2 &&
-        this.x <= basket.x + basket.width / 2)
+    if (this.y + this.velocity.y + this.height / 2 >= this.basket.y &&
+        this.y + this.velocity.y + this.height / 2 <= this.basket.y + 20 &&
+        this.x >= this.basket.x - this.basket.width / 2 &&
+        this.x <= this.basket.x + this.basket.width / 2)
     {
         if (this.type === "garbage")
         {
@@ -175,7 +174,7 @@ FallingObject.prototype.update = function()
                 // Recycling
                 case 0:
                 case 1:
-                    if (basket.sprite.index === 0)
+                    if (this.basket.sprite.index === 0)
                     {
                         gameController.wave.sortedCorrectly++;
                     }
@@ -186,7 +185,7 @@ FallingObject.prototype.update = function()
                     break;
                 // Paper
                 case 3:
-                    if (basket.sprite.index === 1)
+                    if (this.basket.sprite.index === 1)
                     {
                         gameController.wave.sortedCorrectly++;
                     }
@@ -198,7 +197,7 @@ FallingObject.prototype.update = function()
                 // Waste
                 case 2:
                 case 4:
-                    if (basket.sprite.index === 2)
+                    if (this.basket.sprite.index === 2)
                     {
                         gameController.wave.sortedCorrectly++;
                     }
