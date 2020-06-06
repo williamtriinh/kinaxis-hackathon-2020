@@ -15,8 +15,3 @@ VSCode has a nice extension which allows you to run local development servers st
 
 https://docs.google.com/forms/d/e/1FAIpQLSfSufh8MVCfpDoSy4rXETaszteM816RCOf9_CBATRENd9Dqjw/viewform
 
-## Google Doc
-[doc](https://docs.google.com/document/d/1REilmRqFWMH0F61-sHtQkPBWlGqdeAaCDIXq7gaH_o0/edit?usp=sharing)
-
-## Kinaxis Powerpoint (Milestones)
-[link](https://drive.google.com/file/d/1wfqS8fMfLC3EOnYOBuHp5AK-z2ZOljVY/view?usp=sharing)
